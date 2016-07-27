@@ -46,14 +46,12 @@ let getAttrs = (attrs, component) => {
 let getVnode = (attrs, children, component) => {
   attrs = getAttrs(attrs, component);
 
-  //attrs exists
   if (attrs) {
       return {attrs, children, state : component};
   }
 
-  // attrs is absent
   children.unshift(attrs);
   return {attrs, children, state: component};
 };
 
-export {getVnode, getAttrs, validateComponent};
+export {insertUserClass, getClass, validateComponent, getAttrs, getVnode};
