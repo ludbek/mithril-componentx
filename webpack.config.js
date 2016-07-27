@@ -14,7 +14,7 @@ module.exports = {
   },
   module: {
     loaders: [
-      {test: /\.js/, loader: "babel", include: __dirname + "/index.js"}
+      {test: /\.js/, loader: "babel", include: __dirname + "/src"}
     ]
   },
   plugins: [
