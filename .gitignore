@@ -2,3 +2,4 @@ node_modules/
 lib/
 .tern-port
 .brofile
+npm-debug.log

@@ -1,6 +1,6 @@
 {
   "name": "mithril-componentx",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Component factory for Mithriljs.",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,24 @@
     "build": "babel --plugins transform-es2015-modules-commonjs src/ --out-dir lib/",
     "prepublish": "npm run test && npm run build"
   },
+  "files": [
+    "index.js",
+    "lib",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ludbek/mithril-componentx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ludbek/mithril-componentx/issues"
+  },
+  "homepage": "https://github.com/ludbek/mithril-componentx#readme",
+  "keywords": [
+    "mithril",
+    "component",
+    "factory"
+  ],
   "author": "ludbek",
   "license": "ISC",
   "devDependencies": {
