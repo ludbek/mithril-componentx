@@ -1,6 +1,6 @@
 {
   "name": "mithril-componentx",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Component factory for Mithriljs.",
   "main": "index.js",
   "scripts": {
@@ -36,11 +36,11 @@
     "babel-preset-es2015": "^6.9.0",
     "babel-register": "^6.11.5",
     "chai": "^3.5.0",
-    "lodash": "^4.13.1",
     "mocha": "^2.5.3",
     "webpack": "^1.12.14"
   },
   "dependencies": {
+    "lodash": "^4.13.1",
     "classnames": "^2.2.5"
   }
 }
