@@ -23,7 +23,7 @@ export default (struct) => {
     let component = assign(clone(struct.base || base), struct);
     validateComponent(component);
 
-    let originalView = component.view;
+    let originalView = component.view.originalView || component.view;
 
     let ctrlReturn = {};
     if (component.onremove) {
@@ -38,10 +38,6 @@ export default (struct) => {
         return ctrlReturn;
     };
 
-    // view is already wrapped by component factory
-    // happens when base is produced by component factory and its view is not overridden
-    if (component.view.wrapped) return component;
-
     component.view = function (ctrl, attrs, ...children) {
         let vnode = getVnode(attrs, children, component);
 
@@ -50,7 +46,7 @@ export default (struct) => {
         return originalView.call(component, vnode);
     };
 
-    component.view.wrapped = true;
+  component.view.originalView = originalView;
 
     return component;
 };

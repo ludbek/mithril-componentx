@@ -3,7 +3,7 @@ var UglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPlugin');
 
 module.exports = {
   target: 'web',
-  entry: './src/index.js',
+  entry: './index.js',
   output: {
     path: __dirname + '/dist/',
     filename: 'component.min.js',

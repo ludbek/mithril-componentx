@@ -28,7 +28,7 @@ let getAttrs = (attrs, component) => {
   let defaultAttrs = component.getDefaultAttrs();
   let newAttrs = {};
 
-  if(isObject(attrs) && !(attrs.view || attrs.tag)) {
+  if(isObject(attrs) && !(attrs.view || attrs.tag) && !attrs.length) {
     newAttrs = merge(defaultAttrs, attrs);
   }
   else {
