@@ -8,21 +8,40 @@
     "build": "babel --plugins transform-es2015-modules-commonjs src/ --out-dir lib/",
     "prepublish": "npm run test && npm run build"
   },
+  "files": [
+    "src",
+    "lib",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ludbek/mithril-componentx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ludbek/mithril-componentx/issues"
+  },
+  "homepage": "https://github.com/ludbek/mithril-componentx#readme",
+  "keywords": [
+    "component",
+    "mithril",
+    "factory"
+  ],
   "author": "ludbek",
   "license": "ISC",
   "devDependencies": {
     "babel-cli": "^6.11.4",
     "babel-core": "^6.11.4",
     "babel-loader": "^6.2.4",
+    "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.11.5",
     "babel-preset-es2015": "^6.9.0",
     "babel-register": "^6.11.5",
     "chai": "^3.5.0",
-    "lodash": "^4.13.1",
     "mocha": "^2.5.3",
     "webpack": "^1.12.14"
   },
   "dependencies": {
+    "lodash": "^4.13.1",
     "classnames": "^2.2.5"
   }
 }

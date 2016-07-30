@@ -1,4 +1,4 @@
-import merge from "lodash/merge";
+import assign from "lodash/assign";
 import clone from "lodash/clone";
 import isObject from "lodash/isObject";
 import isFunction from "lodash/isFunction";
@@ -20,7 +20,7 @@ let base = {
 };
 
 export default (struct) => {
-    let component = merge(clone(struct.base || base), struct);
+    let component = assign(clone(struct.base || base), struct);
     validateComponent(component);
 
     let originalView = component.view;
