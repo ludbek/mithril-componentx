@@ -138,9 +138,4 @@ describe("getVnode", () => {
     expect(got.children).to.eql([]);
     expect(got.state).to.eql(component);
   });
-
-  it("removes children with '0' as key", () => {
-    let got = getVnode([{0: undefined}], [], component);
-    expect(got.children).to.eql([]);
-  });
 });

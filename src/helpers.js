@@ -54,13 +54,6 @@ let getAttrs = (attrs, component) => {
   return newAttrs;
 };
 
-let normalizeChildren = function (children) {
-  let flatChildren = flattenDeep(children);
-  return filter(flatChildren, (child) => {
-    return !has(child, '0');
-  });
-};
-
 let getVnode = (attrs, children, component) => {
   let newAttrs = getAttrs(attrs, component);
 
@@ -70,7 +63,7 @@ let getVnode = (attrs, children, component) => {
 
   children.unshift(attrs);
 
-  return {attrs: newAttrs, children: normalizeChildren(children), state: component};
+  return {attrs: newAttrs, children, state: component};
 };
 
 export {insertUserClass, getClass, validateComponent, getAttrs, getVnode, isAttr};
