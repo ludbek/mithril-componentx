@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import isObject from "lodash/isObject";
+import isArray from "lodash/isArray";
 import merge from "lodash/merge";
 
 let insertUserClass = (classList, userClass) => {
@@ -24,11 +25,17 @@ let validateComponent = (comp) => {
   if (!comp.view) throw Error("View is required.");
 };
 
+let isAttr = (attrs) => {
+  return !isArray(attrs) && isObject(attrs) && !(attrs.view || attrs.tag) && !attrs.length
+    ? true
+    : false;
+};
+
 let getAttrs = (attrs, component) => {
   let defaultAttrs = component.getDefaultAttrs();
   let newAttrs = {};
 
-  if(isObject(attrs) && !(attrs.view || attrs.tag) && !attrs.length) {
+  if(isAttr(attrs)) {
     newAttrs = merge(defaultAttrs, attrs);
   }
   else {
@@ -44,14 +51,14 @@ let getAttrs = (attrs, component) => {
 };
 
 let getVnode = (attrs, children, component) => {
-  attrs = getAttrs(attrs, component);
+  let newAttrs = getAttrs(attrs, component);
 
-  if (attrs) {
-      return {attrs, children, state : component};
+  if (isAttr(attrs)) {
+    return {attrs: newAttrs, children, state : component};
   }
 
   children.unshift(attrs);
-  return {attrs, children, state: component};
+  return {attrs: newAttrs, children, state: component};
 };
 
-export {insertUserClass, getClass, validateComponent, getAttrs, getVnode};
+export {insertUserClass, getClass, validateComponent, getAttrs, getVnode, isAttr};
