@@ -3,6 +3,7 @@ import isObject from "lodash/isObject";
 import isArray from "lodash/isArray";
 import merge from "lodash/merge";
 import filter from "lodash/filter";
+import has from "lodash/has";
 import flattenDeep from "lodash/flattenDeep";
 
 
@@ -56,7 +57,7 @@ let getAttrs = (attrs, component) => {
 let normalizeChildren = function (children) {
   let flatChildren = flattenDeep(children);
   return filter(flatChildren, (child) => {
-    return JSON.stringify(child) !== JSON.stringify({'0': undefined});
+    return !has(child, '0');
   });
 };
 
