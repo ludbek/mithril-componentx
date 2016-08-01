@@ -2,6 +2,9 @@ import classNames from "classnames";
 import isObject from "lodash/isObject";
 import isArray from "lodash/isArray";
 import merge from "lodash/merge";
+import filter from "lodash/filter";
+import flattenDeep from "lodash/flattenDeep";
+
 
 let insertUserClass = (classList, userClass) => {
   if (classList.length == 0) {
@@ -50,6 +53,13 @@ let getAttrs = (attrs, component) => {
   return newAttrs;
 };
 
+let normalizeChildren = function (children) {
+  let flatChildren = flattenDeep(children);
+  return filter(flatChildren, (child) => {
+    return JSON.stringify(child) !== JSON.stringify({'0': undefined});
+  });
+};
+
 let getVnode = (attrs, children, component) => {
   let newAttrs = getAttrs(attrs, component);
 
@@ -58,7 +68,8 @@ let getVnode = (attrs, children, component) => {
   }
 
   children.unshift(attrs);
-  return {attrs: newAttrs, children, state: component};
+
+  return {attrs: newAttrs, children: normalizeChildren(children), state: component};
 };
 
 export {insertUserClass, getClass, validateComponent, getAttrs, getVnode, isAttr};
