@@ -85,9 +85,9 @@ describe("component", () => {
 
             it("passes vnode to original view", () => {
                 let aComponent = component(struct);
-                aComponent.view("ctrl", {attr1: 1}, "child1", "child2");
+				aComponent.view("ctrl", {attr1: 1}, "child1", "child2");
 
-                expect(check.attrs).to.eql({attr1: 1, dom: {className: "", tagName: "div"}});
+				expect(check.attrs).to.eql({attr1: 1, dom: {className: ""}});
                 expect(check.children).to.eql(["child1", "child2"]);
                 expect(check.state).to.equal(aComponent);
             });
@@ -180,7 +180,7 @@ describe("component", () => {
                 let aComponent = component(struct);
                 let returnObj = new aComponent.controller({attr1: 1}, "child1", "child2");
 
-                expect(check.attrs).to.eql({attr1: 1, dom: {className: "", tagName: "div"}});
+                expect(check.attrs).to.eql({attr1: 1, dom: {className: ""}});
                 expect(check.children).to.eql(["child1", "child2"]);
                 expect(check.state).to.equal(aComponent);
             });

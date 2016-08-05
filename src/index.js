@@ -7,11 +7,7 @@ import {getVnode, getAttrs, validateComponent} from "./helpers.js";
 
 let base = {
     getDefaultAttrs () {
-        return {
-            dom: {
-                tagName: "div"
-            }
-        };
+        return {};
     },
     getClassList (attrs) {
         return [];
@@ -46,7 +42,7 @@ export default (struct) => {
         return originalView.call(component, vnode);
     };
 
-  component.view.originalView = originalView;
+	component.view.originalView = originalView;
 
     return component;
 };
