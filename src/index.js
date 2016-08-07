@@ -43,7 +43,7 @@ export default (struct) => {
 
         this.validateAttrs(vnode.attrs);
 
-        return originalView.call(component, vnode);
+        return originalView.call(this, vnode);
     };
 
   component.view.originalView = originalView;
