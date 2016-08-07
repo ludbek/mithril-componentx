@@ -2,9 +2,7 @@ import classNames from "classnames";
 import isObject from "lodash/isObject";
 import isArray from "lodash/isArray";
 import merge from "lodash/merge";
-import filter from "lodash/filter";
-import has from "lodash/has";
-import flattenDeep from "lodash/flattenDeep";
+import clone from "lodash/clone";
 
 
 let insertUserClass = (classList, userClass) => {
@@ -36,11 +34,11 @@ let isAttr = (attrs) => {
 };
 
 let getAttrs = (attrs, component) => {
-  let defaultAttrs = component.getDefaultAttrs();
+  let defaultAttrs = component.getDefaultAttrs(attrs);
   let newAttrs = {};
 
   if(isAttr(attrs)) {
-    newAttrs = merge(defaultAttrs, attrs);
+    newAttrs = merge(clone(defaultAttrs), attrs);
   }
   else {
     newAttrs = defaultAttrs;
