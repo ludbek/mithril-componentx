@@ -3,6 +3,7 @@ import {insertUserClass,
         validateComponent,
         getAttrs,
         getVnode,
+		isDomAttr,
         isAttr} from "../src/helpers.js";
 import chai from "chai";
 
@@ -66,14 +67,20 @@ describe("getAttrs", () => {
     });
 
     it("merges user supplied attributes with default attributes.", () => {
-        expect(getAttrs({two: 2}, component)).to.eql({one: 1, two: 2, dom: {className: ""}});
+        expect(getAttrs({two: 2}, component)).to.eql({one: 1, two: 2, dom: {}});
     });
 
-    it("attaches class name to DOM attributes", () => {
-        let got = getAttrs({dom: {className: "aclass"}}, component);
-        let expected = {one: 1, dom: {className: "aclass"}};
+    it("attaches class to DOM attributes", () => {
+        let got = getAttrs({class: "aclass"}, component);
+        let expected = {class: "aclass", one: 1, dom: {className: "aclass"}};
         expect(got).to.eql(expected);
     });
+
+	it("attaches 'id' to dom attributes", () => {
+        let got = getAttrs({id: "aId"}, component);
+        let expected = {id: "aId", one: 1, dom: {id: "aId"}};
+        expect(got).to.eql(expected);
+	});
 });
 
 describe("isAttr", () => {
@@ -138,4 +145,32 @@ describe("getVnode", () => {
     expect(got.children).to.eql([]);
     expect(got.state).to.eql(component);
   });
+});
+
+
+describe("isDomAttrs", () => {
+	it("returns true for 'id'.", () => {
+		expect(isDomAttr("id")).to.equal(true);
+	});
+
+	it("returns true for 'style'.", () => {
+		expect(isDomAttr("style")).to.equal(true);
+	});
+
+	it("returns true for 'key'.", () => {
+		expect(isDomAttr("key")).to.equal(true);
+	});
+
+	it("returns true for 'on*'.", () => {
+		expect(isDomAttr("onclick")).to.equal(true);
+	});
+
+	it("returns true for 'data-*'.", () => {
+		expect(isDomAttr("data-key")).to.equal(true);
+	});
+
+	it("returns false for rest.", () => {
+		expect(isDomAttr("xon")).to.equal(false);
+		expect(isDomAttr("keydata-1")).to.equal(false);
+	});
 });

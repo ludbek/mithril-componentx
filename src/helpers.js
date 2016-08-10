@@ -3,19 +3,20 @@ import isObject from "lodash/isObject";
 import isArray from "lodash/isArray";
 import merge from "lodash/merge";
 import clone from "lodash/clone";
+import pickBy from "lodash/pickBy";
 
 
 let insertUserClass = (classList, userClass) => {
   if (classList.length == 0) {
-    return [userClass];
+	return [userClass];
   }
   else if (classList.length == 1) {
-    classList.unshift(userClass);
-    return classList;
+	classList.unshift(userClass);
+	return classList;
   }
   else {
-    classList.splice(1,0, userClass);
-    return classList;
+	classList.splice(1,0, userClass);
+	return classList;
   }
 };
 
@@ -29,34 +30,40 @@ let validateComponent = (comp) => {
 
 let isAttr = (attrs) => {
   return !isArray(attrs) && isObject(attrs) && !(attrs.view || attrs.tag) && !attrs.length
-    ? true
-    : false;
+	? true
+	: false;
+};
+
+let isDomAttr = (key) => {
+	return /^(id|style|key|on.*|data-.*)$/.test(key)? true: false;
 };
 
 let getAttrs = (attrs, component) => {
-  let defaultAttrs = component.getDefaultAttrs(attrs);
-  let newAttrs = {};
+	let defaultAttrs = component.getDefaultAttrs(attrs);
+	let newAttrs = {};
 
-  if(isAttr(attrs)) {
-    newAttrs = merge(clone(defaultAttrs), attrs);
-  }
-  else {
-    newAttrs = defaultAttrs;
-  }
+	if(isAttr(attrs)) {
+		newAttrs = merge(clone(defaultAttrs), attrs);
+	}
+	else {
+		newAttrs = defaultAttrs;
+	}
 
-  if (!newAttrs.dom) {
-    newAttrs.dom = {};
-  }
+	newAttrs.dom = merge(newAttrs.dom, pickBy(newAttrs, isDomAttr));
 
-  newAttrs.dom.className = getClass(component.getClassList(newAttrs), newAttrs.dom.className);
-  return newAttrs;
+	let newClassName = getClass(component.getClassList(newAttrs), newAttrs.class);
+	if (newClassName) {
+		newAttrs.dom.className = newClassName;
+	}
+
+	return newAttrs;
 };
 
 let getVnode = (attrs, children, component) => {
   let newAttrs = getAttrs(attrs, component);
 
   if (isAttr(attrs)) {
-    return {attrs: newAttrs, children, state : component};
+	return {attrs: newAttrs, children, state : component};
   }
 
   children.unshift(attrs);
@@ -64,4 +71,4 @@ let getVnode = (attrs, children, component) => {
   return {attrs: newAttrs, children, state: component};
 };
 
-export {insertUserClass, getClass, validateComponent, getAttrs, getVnode, isAttr};
+export {insertUserClass, getClass, validateComponent, getAttrs, getVnode, isAttr, isDomAttr};

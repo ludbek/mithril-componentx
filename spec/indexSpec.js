@@ -141,13 +141,13 @@ describe("component", () => {
                 expect(check.attrs.dom.className).to.equal("aclass bclass");
             });
 
-            it("'s vnode.attr.dom.className includes user supplied className", () => {
+            it("'s vnode.attr.dom.className includes user supplied class", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "cclass"];
                 };
 
                 let aComponent = component(struct);
-                aComponent.view("ctrl", {dom: {className: "bclass"}});
+                aComponent.view("ctrl", {class: "bclass"});
                 expect(check.attrs.dom.className).to.equal("aclass bclass cclass");
             });
 
