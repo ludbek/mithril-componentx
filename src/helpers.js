@@ -34,8 +34,8 @@ let isAttr = (attrs) => {
 	: false;
 };
 
-let isDomAttr = (key) => {
-	return /^(id|style|key|on.*|data-.*)$/.test(key)? true: false;
+let isDomAttr = (value, key) => {
+	return /^(id|style|on.*|data-.*)$/.test(key)? true: false;
 };
 
 let getAttrs = (attrs, component) => {

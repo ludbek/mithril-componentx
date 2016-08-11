@@ -87,7 +87,7 @@ describe("component", () => {
                 let aComponent = component(struct);
 				aComponent.view("ctrl", {attr1: 1}, "child1", "child2");
 
-				expect(check.attrs).to.eql({attr1: 1, dom: {className: ""}});
+				expect(check.attrs).to.eql({attr1: 1, dom: {}});
                 expect(check.children).to.eql(["child1", "child2"]);
                 expect(check.state).to.equal(aComponent);
             });
@@ -112,13 +112,13 @@ describe("component", () => {
 
             it("does not throw if attributes validation passes", () => {
                 struct.validateAttrs = function (attrs) {
-                    if (attrs.one !== 1) throw Error("One should be 1.");
+                    if (attrs.cha !== 1) throw Error("Cha should be 1.");
                 };
 
                 let aComponent = component(struct);
                 expect(aComponent.view.bind(aComponent,
                                             "ctrl",
-                                            {one: 1}, "child1", "child2")).not.to.throw(Error);
+                                            {cha: 1}, "child1", "child2")).not.to.throw(Error);
             });
 
             it("'s vnode attributes is combination of default and user passed attributes", () => {
@@ -128,7 +128,7 @@ describe("component", () => {
 
                 let aComponent = component(struct);
                 aComponent.view("ctrl", {attr2: 2});
-                expect(check.attrs).to.eql({attr1: 1, attr2: 2, dom: {className: ""}});
+                expect(check.attrs).to.eql({attr1: 1, attr2: 2, dom: {}});
             });
 
             it("'s vnode.attr.dom.className is constructed out of class list", () => {
@@ -158,9 +158,9 @@ describe("component", () => {
 
             beforeEach(() => {
                 struct = {
-                    one: 1,
+                    cha: 1,
                     onremove () {
-                        return this.one;
+                        return this.cha;
                     },
                     oninit (vnode) {
                         check = vnode;
@@ -180,7 +180,7 @@ describe("component", () => {
                 let aComponent = component(struct);
                 let returnObj = new aComponent.controller({attr1: 1}, "child1", "child2");
 
-                expect(check.attrs).to.eql({attr1: 1, dom: {className: ""}});
+                expect(check.attrs).to.eql({attr1: 1, dom: {}});
                 expect(check.children).to.eql(["child1", "child2"]);
                 expect(check.state).to.equal(aComponent);
             });
