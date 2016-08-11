@@ -34,7 +34,7 @@ let isAttr = (attrs) => {
 	: false;
 };
 
-let isDomAttr = (value, key) => {
+let isRootAttr = (value, key) => {
 	return /^(id|style|on.*|data-.*)$/.test(key)? true: false;
 };
 
@@ -49,11 +49,11 @@ let getAttrs = (attrs, component) => {
 		newAttrs = defaultAttrs;
 	}
 
-	newAttrs.dom = merge(newAttrs.dom, pickBy(newAttrs, isDomAttr));
+	newAttrs.rootAttrs = merge(newAttrs.rootAttrs, pickBy(newAttrs, isRootAttr));
 
 	let newClassName = getClass(component.getClassList(newAttrs), newAttrs.class);
 	if (newClassName) {
-		newAttrs.dom.className = newClassName;
+		newAttrs.rootAttrs.className = newClassName;
 	}
 
 	return newAttrs;
@@ -71,4 +71,4 @@ let getVnode = (attrs, children, component) => {
   return {attrs: newAttrs, children, state: component};
 };
 
-export {insertUserClass, getClass, validateComponent, getAttrs, getVnode, isAttr, isDomAttr};
+export {insertUserClass, getClass, validateComponent, getAttrs, getVnode, isAttr, isRootAttr};

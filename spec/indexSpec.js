@@ -87,7 +87,7 @@ describe("component", () => {
                 let aComponent = component(struct);
 				aComponent.view("ctrl", {attr1: 1}, "child1", "child2");
 
-				expect(check.attrs).to.eql({attr1: 1, dom: {}});
+				expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
                 expect(check.children).to.eql(["child1", "child2"]);
                 expect(check.state).to.equal(aComponent);
             });
@@ -128,27 +128,27 @@ describe("component", () => {
 
                 let aComponent = component(struct);
                 aComponent.view("ctrl", {attr2: 2});
-                expect(check.attrs).to.eql({attr1: 1, attr2: 2, dom: {}});
+                expect(check.attrs).to.eql({attr1: 1, attr2: 2, rootAttrs: {}});
             });
 
-            it("'s vnode.attr.dom.className is constructed out of class list", () => {
+            it("'s vnode.attr.rootAttrs.className is constructed out of class list", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "bclass"];
                 };
 
                 let aComponent = component(struct);
                 aComponent.view("ctrl", {attr2: 2});
-                expect(check.attrs.dom.className).to.equal("aclass bclass");
+                expect(check.attrs.rootAttrs.className).to.equal("aclass bclass");
             });
 
-            it("'s vnode.attr.dom.className includes user supplied class", () => {
+            it("'s vnode.attr.rootAttrs.className includes user supplied class", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "cclass"];
                 };
 
                 let aComponent = component(struct);
                 aComponent.view("ctrl", {class: "bclass"});
-                expect(check.attrs.dom.className).to.equal("aclass bclass cclass");
+                expect(check.attrs.rootAttrs.className).to.equal("aclass bclass cclass");
             });
 
         });
@@ -180,7 +180,7 @@ describe("component", () => {
                 let aComponent = component(struct);
                 let returnObj = new aComponent.controller({attr1: 1}, "child1", "child2");
 
-                expect(check.attrs).to.eql({attr1: 1, dom: {}});
+                expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
                 expect(check.children).to.eql(["child1", "child2"]);
                 expect(check.state).to.equal(aComponent);
             });

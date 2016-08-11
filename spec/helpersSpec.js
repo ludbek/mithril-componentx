@@ -3,7 +3,7 @@ import {insertUserClass,
         validateComponent,
         getAttrs,
         getVnode,
-		isDomAttr,
+		isRootAttr,
         isAttr} from "../src/helpers.js";
 import chai from "chai";
 
@@ -67,18 +67,18 @@ describe("getAttrs", () => {
     });
 
     it("merges user supplied attributes with default attributes.", () => {
-        expect(getAttrs({nye: 2}, component)).to.eql({cha: 1, nye: 2, dom: {}});
+        expect(getAttrs({nye: 2}, component)).to.eql({cha: 1, nye: 2, rootAttrs: {}});
     });
 
-    it("attaches class to DOM attributes", () => {
+    it("attaches class to root element attributes", () => {
         let got = getAttrs({class: "aclass"}, component);
-        let expected = {class: "aclass", cha: 1, dom: {className: "aclass"}};
+        let expected = {class: "aclass", cha: 1, rootAttrs: {className: "aclass"}};
         expect(got).to.eql(expected);
     });
 
-	it("attaches 'id' to dom attributes", () => {
+	it("attaches 'id' to root element attributes", () => {
         let got = getAttrs({id: "aId"}, component);
-        let expected = {id: "aId", cha: 1, dom: {id: "aId"}};
+        let expected = {id: "aId", cha: 1, rootAttrs: {id: "aId"}};
         expect(got).to.eql(expected);
 	});
 });
@@ -119,13 +119,13 @@ describe("getVnode", () => {
 		let attrs = {cha: 1};
 		let children = ["child"];
 		let got = getVnode(attrs, children, component);
-		expect(got.attrs).to.eql({cha: 1, nye: 2, dom: {}});
+		expect(got.attrs).to.eql({cha: 1, nye: 2, rootAttrs: {}});
 	});
 
 	it("attaches default attribute to vnode.attrs if no attribute was passed", () => {
 		let children = ["child"];
 		let got = getVnode([], children, component);
-		expect(got.attrs).to.eql({nye: 2, dom: {}});
+		expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
 	});
 
 	it("attaches given children to vnode.children", () => {
@@ -141,32 +141,32 @@ describe("getVnode", () => {
 
 	it("returns object with attributes, children and state", () => {
 		let got = getVnode({}, [], component);
-		expect(got.attrs).to.eql({nye: 2, dom: {}});
+		expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
 		expect(got.children).to.eql([]);
 		expect(got.state).to.eql(component);
 	});
 });
 
 
-describe("isDomAttrs", () => {
+describe("isRootAttrs", () => {
 	it("returns true for 'id'.", () => {
-		expect(isDomAttr(null, "id")).to.equal(true);
+		expect(isRootAttr(null, "id")).to.equal(true);
 	});
 
 	it("returns true for 'style'.", () => {
-		expect(isDomAttr(null, "style")).to.equal(true);
+		expect(isRootAttr(null, "style")).to.equal(true);
 	});
 
 	it("returns true for 'on*'.", () => {
-		expect(isDomAttr(null, "onclick")).to.equal(true);
+		expect(isRootAttr(null, "onclick")).to.equal(true);
 	});
 
 	it("returns true for 'data-*'.", () => {
-		expect(isDomAttr(null, "data-key")).to.equal(true);
+		expect(isRootAttr(null, "data-key")).to.equal(true);
 	});
 
 	it("returns false for rest.", () => {
-		expect(isDomAttr(null, "xon")).to.equal(false);
-		expect(isDomAttr(null, "keydata-1")).to.equal(false);
+		expect(isRootAttr(null, "xon")).to.equal(false);
+		expect(isRootAttr(null, "keydata-1")).to.equal(false);
 	});
 });
