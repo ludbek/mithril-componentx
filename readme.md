@@ -70,7 +70,7 @@ Except for the component's lifecycle methods.
 import component from "mithril-componentx";
 
 let page = component({
-	onint (vnode) {
+	oninit (vnode) {
 		// do some initialization
 	},
 	onremove () {
