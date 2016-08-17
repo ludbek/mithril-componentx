@@ -6,7 +6,7 @@ A component factory for [Mithril](https://github.com/lhorie/mithril.js).
 
 - Components compatible with [Mithril v1.x](https://github.com/lhorie/mithril.js/tree/rewrite).
 - Validates attributes passed to a component.
-- Extendable component.
+- Extendable components.
 - Supports default attributes.
 - Powerful class name generator for component's root.
 - Passes essential attributes directly to component's root.
@@ -52,7 +52,7 @@ let itemsPage = component({
 	getDefaultAttrs (attrs) {
 		return {
 			heading: m("h1", "List of awesome stuff."),
-			content: m(grid, {class: "stackable"}, /*list of stuff*/)
+			content: m(grid, /*list of stuff*/)
 		};
 	}
 });
@@ -87,15 +87,6 @@ let page = component({
 	}
 });
 ```
-
-# Vnode
-A component's view gets `vnode`.
-It has three properties:
-
-1. `attrs` - the attributes passed through hyperscript i.e. `m`
-2. `children` - the child elements passed through hyperscript
-3. `state` - the component itself
-
 # Using a component
 ```javascript
 // throws exception "Heading is required."
@@ -108,24 +99,61 @@ m(page, {
 })
 ```
 
-# Extending a component
-Specify a base for new component.  New properties overrides base properties.
-However the base component is available at new component's `base` property.
+# Vnode
+A component's view gets `vnode`.
+It has three properties:
 
-In example below `itemsPage` extends `page`.
+1. `attrs` - the attributes passed through hyperscript i.e. `m`
+2. `children` - the child elements passed through hyperscript
+3. `state` - the component itself
+
+The component properties and methods can be accessed through 
+`vnode.state` and `this` at view.
 
 ```javascript
-let itemsPage = component({
-	base: page,
-	getDefaultAttrs (attrs) {
-		return {
-			heading: m("h1", "List of awesome stuff."),
-			content: m(grid, {class: "stackable"}, /*list of stuff*/)
-		};
+var button = component({
+	submit (e) {
+		/* do someting */
+	},
+	view (vnode) {
+		//return m("button", {onclick: this.submit}) or
+		return m("button", {onclick: vnode.state.submit});
+	}
+
+});
+```
+
+# Extending a component
+Specify a base for new component. New properties overrides base properties.
+However the base component is available at new component's `base` property.
+
+```javascript
+let button = component({
+	getClassList (attrs) {
+		return [
+			"ui",
+			"button"
+			];
+	},
+	submit (e) {
+		/* submit form */
+	},
+	view (vnode) {
+		return m(attrs.root, attrs.rootAttrs, {onclick: this.submit}, "Submit")
+	}
+});
+
+
+let primaryButton = component({
+	base: button,
+	getClassList (attrs) {
+		// access base method
+		let classList = this.base.getClassList.bind(this, attrs);
+		classList.shift("primary");
+		return classList;
 	}
 });
 ```
-## Access base properties and methods
 
 # Validate attributes
 Every time a component is rendered, its `validateAttrs` method is called.
@@ -141,4 +169,67 @@ m(page, {
 	heading: m("h1", "A heading"),
 	content: m("p", "A content")
 })
+```
+
+# Default attributes
+Components can have default attributes which are merged with attributes passed by user.
+User passed attributes override default attributes.
+
+```javascript
+let redButton = component({
+	getDefaultAttrs (attrs) {
+		return {color: "red"};
+	},
+	getClassList (attrs) {
+		return ["ui", attrs.color, "button"]
+	},
+	view (vnode) {
+		return m("button", vnode.attrs.rootAttrs, vnode.children);
+	}
+});
+
+
+// change color to blue
+m(redButton, {color: "blue"}, "Blue button")
+```
+
+# Passing attributes to root of a component
+Attributes like `id, style, on* (event handlers), data-* and class` are made availabe at
+`vnode.attrs.rootAttrs`.
+
+```javascript
+let button = component({
+	view (vnode) {
+		let rootAttrs = vnode.attrs.rootAttrs;
+		return m("button", rootAttrs, vnode.children);
+	}
+});
+
+m(button, {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "red"}}, "Like");
+// vnode.attrs.rootAttrs = {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "red"}}
+```
+
+# Class name for component's root
+Class name for component's root is generated from `getClassList()` and is made available at
+`vnode.attrs.rootAttrs.className`. Class name is generated using excellent [classnames](https://github.com/JedWatson/classnames);
+User supplied class is merged with component's class list.
+
+```javascript
+let button = component({
+	getClassList (attrs) {
+		return [
+			"ui",
+			{loading: attrs.loading},
+			{disabled: attrs.disabled},
+			"button"
+		];
+	},
+	view (vnode) {
+		return m("button", vnode.attrs.rootAttrs, children);
+	}
+});
+
+
+m(button, {disabled: true, color: "blue"}, "Click");
+// <button class="ui disabled blue button"></button>
 ```
