@@ -63,6 +63,7 @@ let itemsPage = component({
 The component signature is similar to [`Mithril 1.x`](https://github.com/lhorie/mithril.js/blob/rewrite/docs/components.md).
 Except for the component's lifecycle methods.
 `mithril-componentx` supports only two lifecycle methods.
+
 1. `oninit`- called when component is initialized.
 2. `onremove` - called when component is detached.
 
@@ -92,7 +93,7 @@ let page = component({
 // throws exception "Heading is required."
 m(page)
 
-// returns valid Mithril 2.x component
+// returns valid Mithril 0.2.x component
 m(page, {
 	heading: m("h1", "A heading"),
 	content: m("p", "A content")
@@ -211,7 +212,7 @@ m(button, {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "re
 
 # Class name for component's root
 Class name for component's root is generated from `getClassList()` and is made available at
-`vnode.attrs.rootAttrs.className`. Class name is generated using excellent [classnames](https://github.com/JedWatson/classnames);
+`vnode.attrs.rootAttrs.className`. Class name is generated using excellent [classnames](https://github.com/JedWatson/classnames).
 User supplied class is merged with component's class list.
 
 ```javascript
