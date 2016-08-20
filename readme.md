@@ -150,7 +150,7 @@ let primaryButton = component({
 	getClassList (attrs) {
 		// access base method
 		let classList = this.base.getClassList.bind(this, attrs);
-		classList.shift("primary");
+		classList.unshift("primary");
 		return classList;
 	}
 });
@@ -231,6 +231,6 @@ let button = component({
 });
 
 
-m(button, {disabled: true, color: "blue"}, "Click");
+m(button, {disabled: true, class: "blue"}, "Click");
 // <button class="ui disabled blue button"></button>
 ```
