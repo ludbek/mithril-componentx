@@ -35,7 +35,7 @@ let isAttr = (attrs) => {
 };
 
 let isRootAttr = (value, key) => {
-	return /^(id|style|on.*|data-.*)$/.test(key)? true: false;
+	return /^(id|style|on.*|data-.*|config)$/.test(key)? true: false;
 };
 
 let getAttrs = (attrs, component) => {

@@ -165,6 +165,10 @@ describe("isRootAttrs", () => {
 		expect(isRootAttr(null, "data-key")).to.equal(true);
 	});
 
+	it("returns true for 'config'.", () => {
+		expect(isRootAttr(null, "data-key")).to.equal(true);
+	});
+
 	it("returns false for rest.", () => {
 		expect(isRootAttr(null, "xon")).to.equal(false);
 		expect(isRootAttr(null, "keydata-1")).to.equal(false);
