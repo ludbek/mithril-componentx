@@ -1,5 +1,6 @@
-import {factory, base, validateComponent} from "../src/index.js";
+import {factory, base, validateComponent, isMithril1} from "../src/index.js";
 import chai from "chai";
+import m from "mithril";
 
 let expect = chai.expect;
 
@@ -13,6 +14,23 @@ describe("validateComponent", () => {
 
 	it("won't complain if component has view", () => {
 		expect(validateComponent.bind(base, {view () {}})).not.to.throw(Error);
+	});
+});
+
+
+describe("isMithril1", () => {
+	it("returns true for mithril version 1.x.x", () => {
+		let m = {
+			version: "1.0.0"
+		};
+		expect(isMithril1(m)).to.equal(true);
+	});
+
+	it("returns false for mithril version 0.x.x", () => {
+		let m = {
+			version: "0.2.0"
+		};
+		expect(isMithril1(m)).to.equal(false);
 	});
 });
 
@@ -231,6 +249,15 @@ describe("factory", () => {
         expect(bComponent.view()).to.equal(aStruct.view());
     });
 
+	it("does not include controller for mithril1.", () => {
+		m.version = "1.0.0";
+
+		let aComponent = factory({view () {}});
+		expect(aComponent.controller).to.not.exist;
+
+		m.version = "0.2.0";
+	});
+
     describe("aComponent", () => {
         describe(".view", () => {
             let struct, check, checkThis;
@@ -246,10 +273,10 @@ describe("factory", () => {
             });
 
             it("calls original view with vnode", () => {
-                let aComponent = factory(struct);
-                aComponent.view("ctrl", {}, "child1", "child2");
+				var aComponent = factory(struct);
+				aComponent.view("ctrl", {}, "child1", "child2");
 
-                expect(check).to.exist;
+				expect(check).to.exist;
             });
 
             it("passes vnode to original view", () => {
