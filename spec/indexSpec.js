@@ -1,17 +1,186 @@
-import component from "../src/index.js";
+import {factory, base, validateComponent} from "../src/index.js";
 import chai from "chai";
 
 let expect = chai.expect;
 
-describe("component", () => {
+let noop = function () {};
+
+
+describe("validateComponent", () => {
+	it("complains if component lacks view", () => {
+		expect(validateComponent.bind(base, {})).to.throw(Error);
+	});
+
+	it("won't complain if component has view", () => {
+		expect(validateComponent.bind(base, {view () {}})).not.to.throw(Error);
+	});
+});
+
+
+describe("base", () => {
+	describe("insertUserClass", () => {
+		it("returns user supplied class if class list is empty", () => {
+			let classList = [];
+			expect(base.insertUserClass(classList, "aclass")).to.eql(['aclass']);
+		});
+
+		it("prepends user supplied class if class list has single class", () => {
+			let classList = ["bclass"];
+			expect(base.insertUserClass(classList, "aclass")).to.eql(['aclass', 'bclass']);
+		});
+
+		it("inserts user supplied class before final class", () => {
+			let classList = ["aclass", "cclass"];
+			expect(base.insertUserClass(classList, "bclass")).to.eql(['aclass', 'bclass', "cclass"]);
+		});
+	});
+
+	describe("getClass", () => {
+		it("converts class list into a string", () => {
+			expect(base.getClass(["aclass", "bclass"])).to.equal("aclass bclass");
+		});
+
+		it("removes invalid class names", () => {
+			expect(base.getClass(["aclass", null, "", undefined])).to.equal("aclass");
+		});
+
+		it("includes user supplied class", () => {
+			expect(base.getClass(["aclass", "cclass"], "bclass")).to.equal("aclass bclass cclass");
+		});
+	});
+
+	describe("getAttrs", () => {
+		let component;
+		beforeEach(() => {
+			component = {
+				getDefaultAttrs () {
+					return {cha: 1};
+				},
+				getClassList () {
+					return [];
+				}
+			};
+		});
+
+		it("merges user supplied attributes with default attributes.", () => {
+			expect(base.getAttrs({nye: 2}, component)).to.eql({cha: 1, nye: 2, rootAttrs: {}});
+		});
+
+		it("attaches class to root element attributes", () => {
+			let got = base.getAttrs({class: "aclass"}, component);
+			let expected = {class: "aclass", cha: 1, rootAttrs: {className: "aclass"}};
+			expect(got).to.eql(expected);
+		});
+
+		it("attaches 'id' to root element attributes", () => {
+			let got = base.getAttrs({id: "aId"}, component);
+			let expected = {id: "aId", cha: 1, rootAttrs: {id: "aId"}};
+			expect(got).to.eql(expected);
+		});
+	});
+
+	describe("isAttr", () => {
+	  it("returns false if it has .tag attribute", () => {
+		expect(base.isAttr({tag: 'atag'})).to.equal(false);
+	  });
+
+	  it("returns false if it has .view attribute", () => {
+		expect(base.isAttr({view: noop})).to.equal(false);
+	  });
+
+	  it("returns false if it is an array", () => {
+		expect(base.isAttr([])).to.equal(false);
+	  });
+
+	  it("returns true if it is an object without .tag and .view attributes", () => {
+		expect(base.isAttr({})).to.equal(true);
+	  });
+	});
+
+	describe("getVnode", () => {
+	  let component;
+
+	  beforeEach(() => {
+		component = {
+		  getDefaultAttrs () {
+			  return {nye: 2};
+		  },
+		  getClassList () {
+			return [];
+		  }
+		};
+	  });
+
+		it("attaches given attribute merged with default attributes to vnode.attrs", () => {
+			let attrs = {cha: 1};
+			let children = ["child"];
+			let got = base.getVnode(attrs, children, component);
+			expect(got.attrs).to.eql({cha: 1, nye: 2, rootAttrs: {}});
+		});
+
+		it("attaches default attribute to vnode.attrs if no attribute was passed", () => {
+			let children = ["child"];
+			let got = base.getVnode([], children, component);
+			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
+		});
+
+		it("attaches given children to vnode.children", () => {
+			let children = ["child"];
+			let got = base.getVnode({}, children, component);
+			expect(got.children).to.eql(children);
+		});
+
+		it("identifies the child node even if attribute is absent", () => {
+			let got = base.getVnode(1, [2], component);
+			expect(got.children).to.eql([1,2]);
+		});
+
+		it("returns object with attributes, children and state", () => {
+			let got = base.getVnode({}, [], component);
+			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
+			expect(got.children).to.eql([]);
+			expect(got.state).to.eql(component);
+		});
+	});
+
+
+	describe("isRootAttrs", () => {
+		it("returns true for 'id'.", () => {
+			expect(base.isRootAttr(null, "id")).to.equal(true);
+		});
+
+		it("returns true for 'style'.", () => {
+			expect(base.isRootAttr(null, "style")).to.equal(true);
+		});
+
+		it("returns true for 'on*'.", () => {
+			expect(base.isRootAttr(null, "onclick")).to.equal(true);
+		});
+
+		it("returns true for 'data-*'.", () => {
+			expect(base.isRootAttr(null, "data-key")).to.equal(true);
+		});
+
+		it("returns true for 'config'.", () => {
+			expect(base.isRootAttr(null, "data-key")).to.equal(true);
+		});
+
+		it("returns false for rest.", () => {
+			expect(base.isRootAttr(null, "xon")).to.equal(false);
+			expect(base.isRootAttr(null, "keydata-1")).to.equal(false);
+		});
+	});
+});
+
+describe("factory", () => {
     it("validates component", () => {
-        expect(component.bind(component, {})).to.throw(Error);
+        expect(factory.bind(factory, {})).to.throw(Error);
 
         let struct = {
             view () {
             }
         };
-        expect(component.bind(component, struct)).not.to.throw(Error);
+        expect(factory.bind(factory, struct)).not.to.throw(Error);
     });
 
     it("returns valid mithril component", () => {
@@ -20,7 +189,7 @@ describe("component", () => {
             }
         };
 
-        let aComponent = component(struct);
+        let aComponent = factory(struct);
 
         expect(aComponent.view).to.exist;
         expect(aComponent.controller).to.exist;
@@ -32,7 +201,7 @@ describe("component", () => {
             view () {}
         };
 
-        let newComponent = component(struct);
+        let newComponent = factory(struct);
         expect(newComponent.one).to.equal(1);
         expect(newComponent.view).to.exist;
     });
@@ -44,7 +213,7 @@ describe("component", () => {
             view () {}
         };
 
-        let newComponent = component(struct);
+        let newComponent = factory(struct);
         expect(newComponent.one).to.equal(2);
     });
 
@@ -54,11 +223,11 @@ describe("component", () => {
                 return "a component's view";
             }
         };
-        let aComponent = component(aStruct);
+        let aComponent = factory(aStruct);
         let bStruct = {
             base: aComponent
         };
-        let bComponent = component(bStruct);
+        let bComponent = factory(bStruct);
         expect(bComponent.view()).to.equal(aStruct.view());
     });
 
@@ -77,14 +246,14 @@ describe("component", () => {
             });
 
             it("calls original view with vnode", () => {
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 aComponent.view("ctrl", {}, "child1", "child2");
 
                 expect(check).to.exist;
             });
 
             it("passes vnode to original view", () => {
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
 				aComponent.view("ctrl", {attr1: 1}, "child1", "child2");
 
 				expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
@@ -93,7 +262,7 @@ describe("component", () => {
             });
 
             it("binds component to original view's 'this'", () => {
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 aComponent.view("ctrl", {}, "child1", "child2");
 
                 expect(checkThis).to.equal(aComponent);
@@ -104,7 +273,7 @@ describe("component", () => {
                     if (attrs.one !== 1) throw Error("One should be 1.");
                 };
 
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 expect(aComponent.view.bind(aComponent,
                                             "ctrl",
                                             {one: 2}, "child1", "child2")).to.throw(Error);
@@ -115,7 +284,7 @@ describe("component", () => {
                     if (attrs.cha !== 1) throw Error("Cha should be 1.");
                 };
 
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 expect(aComponent.view.bind(aComponent,
                                             "ctrl",
                                             {cha: 1}, "child1", "child2")).not.to.throw(Error);
@@ -126,7 +295,7 @@ describe("component", () => {
                     return {attr1: 1};
                 };
 
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 aComponent.view("ctrl", {attr2: 2});
                 expect(check.attrs).to.eql({attr1: 1, attr2: 2, rootAttrs: {}});
             });
@@ -136,7 +305,7 @@ describe("component", () => {
                     return ["aclass", "bclass"];
                 };
 
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 aComponent.view("ctrl", {attr2: 2});
                 expect(check.attrs.rootAttrs.className).to.equal("aclass bclass");
             });
@@ -146,7 +315,7 @@ describe("component", () => {
                     return ["aclass", "cclass"];
                 };
 
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 aComponent.view("ctrl", {class: "bclass"});
                 expect(check.attrs.rootAttrs.className).to.equal("aclass bclass cclass");
             });
@@ -171,13 +340,13 @@ describe("component", () => {
             });
 
             it("calls oninit if exists", () => {
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 let returnObj = new aComponent.controller();
                 expect(check).to.exist;
             });
 
             it("passes vnode to oninit", () => {
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 let returnObj = new aComponent.controller({attr1: 1}, "child1", "child2");
 
                 expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
@@ -186,26 +355,26 @@ describe("component", () => {
             });
 
             it("binds oninit to component", () => {
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 let returnObj = new aComponent.controller("attr", "child1", "child2");
                 expect(checkThis).to.equal(aComponent);
             });
 
             it("returns object with onunload if onremove exists", () => {
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 let returnObj = new aComponent.controller();
                 expect(returnObj.onunload).to.exist;
             });
 
             it("binds component to onunload method.", () => {
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 let returnObj = new aComponent.controller();
                 expect(returnObj.onunload()).to.equal(1);
             });
 
             it("returns object without onunload if onremove does not exist", () => {
                 delete struct.onremove;
-                let aComponent = component(struct);
+                let aComponent = factory(struct);
                 let returnObj = new aComponent.controller();
                 expect(returnObj.onunload).not.to.exist;
             });
