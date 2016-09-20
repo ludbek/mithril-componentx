@@ -192,6 +192,12 @@ describe("base", () => {
 describe("factory", () => {
 	let vdom;
 
+	beforeEach(() => {
+		vdom = {
+			attrs: {}
+		};
+	});
+
     it("validates component", () => {
         expect(factory.bind(factory, {})).to.throw(Error);
 
@@ -211,7 +217,6 @@ describe("factory", () => {
         let aComponent = factory(struct);
 
         expect(aComponent.view).to.exist;
-        expect(aComponent.controller).to.exist;
     });
 
     it("merges new component with base component", () => {
@@ -247,14 +252,19 @@ describe("factory", () => {
             base: aComponent
         };
         let bComponent = factory(bStruct);
-        expect(bComponent.view()).to.equal(aStruct.view());
+        expect(bComponent.view(vdom)).to.equal(aStruct.view());
     });
 
     describe("aComponent", () => {
         describe(".view", () => {
-            let struct, check, checkThis;
+            let vdom, struct, check, checkThis;
 
             beforeEach(() => {
+				vdom = {
+					children: ["child1", "child2"],
+					attrs: {}
+				};
+
                 struct = {
                     one: 1,
                     view (vnode) {
@@ -266,14 +276,16 @@ describe("factory", () => {
 
             it("calls original view with vnode", () => {
 				var aComponent = factory(struct);
-				aComponent.view("ctrl", {}, "child1", "child2");
+				aComponent.view(vdom);
 
 				expect(check).to.exist;
             });
 
             it("passes vnode to original view", () => {
                 let aComponent = factory(struct);
-				aComponent.view("ctrl", {attr1: 1}, "child1", "child2");
+				vdom.attrs = {attr1: 1};
+				vdom.state = aComponent;
+				aComponent.view(vdom);
 
 				expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
                 expect(check.children).to.eql(["child1", "child2"]);
@@ -282,7 +294,7 @@ describe("factory", () => {
 
             it("binds component to original view's 'this'", () => {
                 let aComponent = factory(struct);
-                aComponent.view("ctrl", {}, "child1", "child2");
+                aComponent.view(vdom);
 
                 expect(checkThis).to.equal(aComponent);
             });
@@ -293,9 +305,8 @@ describe("factory", () => {
                 };
 
                 let aComponent = factory(struct);
-                expect(aComponent.view.bind(aComponent,
-                                            "ctrl",
-                                            {one: 2}, "child1", "child2")).to.throw(Error);
+				vdom.attrs = {one: 2};
+                expect(aComponent.view.bind(aComponent, vdom)).to.throw(Error);
             });
 
             it("does not throw if attributes validation passes", () => {
@@ -304,9 +315,8 @@ describe("factory", () => {
                 };
 
                 let aComponent = factory(struct);
-                expect(aComponent.view.bind(aComponent,
-                                            "ctrl",
-                                            {cha: 1}, "child1", "child2")).not.to.throw(Error);
+				vdom.attrs = {cha: 1};
+                expect(aComponent.view.bind(aComponent, vdom)).not.to.throw(Error);
             });
 
             it("'s vnode attributes is combination of default and user passed attributes", () => {
@@ -315,7 +325,8 @@ describe("factory", () => {
                 };
 
                 let aComponent = factory(struct);
-                aComponent.view("ctrl", {attr2: 2});
+				vdom.attrs = {attr2: 2};
+                aComponent.view(vdom);
                 expect(check.attrs).to.eql({attr1: 1, attr2: 2, rootAttrs: {}});
             });
 
@@ -325,7 +336,7 @@ describe("factory", () => {
                 };
 
                 let aComponent = factory(struct);
-                aComponent.view("ctrl", {attr2: 2});
+                aComponent.view(vdom);
                 expect(check.attrs.rootAttrs.className).to.equal("aclass bclass");
             });
 
@@ -335,68 +346,11 @@ describe("factory", () => {
                 };
 
                 let aComponent = factory(struct);
-                aComponent.view("ctrl", {class: "bclass"});
+				vdom.attrs.class = "bclass";
+                aComponent.view(vdom);
                 expect(check.attrs.rootAttrs.className).to.equal("aclass bclass cclass");
             });
 
-        });
-
-        describe(".controller", () => {
-            let struct, check, checkThis;
-
-            beforeEach(() => {
-                struct = {
-                    cha: 1,
-                    onremove () {
-                        return this.cha;
-                    },
-                    oninit (vnode) {
-                        check = vnode;
-                        checkThis = this;
-                    },
-                    view () {}
-                };
-            });
-
-            it("calls oninit if exists", () => {
-                let aComponent = factory(struct);
-                let returnObj = new aComponent.controller();
-                expect(check).to.exist;
-            });
-
-            it("passes vnode to oninit", () => {
-                let aComponent = factory(struct);
-                let returnObj = new aComponent.controller({attr1: 1}, "child1", "child2");
-
-                expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
-                expect(check.children).to.eql(["child1", "child2"]);
-                expect(check.state).to.equal(aComponent);
-            });
-
-            it("binds oninit to component", () => {
-                let aComponent = factory(struct);
-                let returnObj = new aComponent.controller("attr", "child1", "child2");
-                expect(checkThis).to.equal(aComponent);
-            });
-
-            it("returns object with onunload if onremove exists", () => {
-                let aComponent = factory(struct);
-                let returnObj = new aComponent.controller();
-                expect(returnObj.onunload).to.exist;
-            });
-
-            it("binds component to onunload method.", () => {
-                let aComponent = factory(struct);
-                let returnObj = new aComponent.controller();
-                expect(returnObj.onunload()).to.equal(1);
-            });
-
-            it("returns object without onunload if onremove does not exist", () => {
-                delete struct.onremove;
-                let aComponent = factory(struct);
-                let returnObj = new aComponent.controller();
-                expect(returnObj.onunload).not.to.exist;
-            });
         });
     });
 });

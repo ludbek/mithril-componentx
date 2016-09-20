@@ -6,7 +6,7 @@ import classNames from "classnames";
 import isArray from "lodash/isArray";
 import merge from "lodash/merge";
 import pickBy from "lodash/pickBy";
-import m from "mithril";
+
 
 
 export const validateComponent = (comp) => {
@@ -14,9 +14,22 @@ export const validateComponent = (comp) => {
 };
 
 
-export const isMithril1 = (mithril) => {
-	if (/^1\.\d\.\d$/.test(mithril.version)) return true;
-	return false;
+export const isMithril1 = () => {
+	// for browser
+	try {
+		if (/^1\.\d\.\d$/.test(m.version)) return true;
+		return false;
+	}
+	// node
+	catch (err){
+		try {
+			require("mithril");
+			return false;
+		}
+		catch (err)  {
+			return true;
+		}
+	}
 };
 
 export const base = {
@@ -26,6 +39,7 @@ export const base = {
 	 * Returns true for attirbutes which are selected for root dom of the component.
 	 * */
 	isRootAttr (value, key) {
+		// TODO: if mithril 1.x.x component lifecycle return false
 		return /^(id|style|on.*|data-.*|config)$/.test(key)? true: false;
 	},
 
@@ -58,7 +72,7 @@ export const base = {
 		let defaultAttrs = component.getDefaultAttrs(attrs);
 		let newAttrs = {};
 
-		if (!isMithril1(m)) {
+		if (!isMithril1()) {
 			if(this.isAttr(attrs)) {
 				newAttrs = merge(clone(defaultAttrs), attrs);
 			}
@@ -111,7 +125,7 @@ export const factory = (struct) => {
     let originalView = component.view.originalView || component.view;
 
 	// for mithril 0.2.x
-	if (!isMithril1(m)) {
+	if (!isMithril1()) {
 		let ctrlReturn = {};
 		if (component.onremove) {
 			ctrlReturn.onunload = component.onremove.bind(component);
