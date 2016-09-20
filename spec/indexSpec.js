@@ -250,6 +250,19 @@ describe("factory", () => {
         expect(bComponent.view()).to.equal(aStruct.view());
     });
 
+	it("supports mixins", () => {
+		let struct = {
+			base: {zero: 0},
+			mixins: [{one: 1}, {two: 2}],
+			view (vnode) {}
+		};
+
+        let aComponent = factory(struct);
+		expect(aComponent.zero).to.equal(0);
+		expect(aComponent.one).to.equal(1);
+		expect(aComponent.two).to.equal(2);
+	});
+
     describe("aComponent", () => {
         describe(".view", () => {
             let struct, check, checkThis;

@@ -6,6 +6,7 @@ import classNames from "classnames";
 import isArray from "lodash/isArray";
 import merge from "lodash/merge";
 import pickBy from "lodash/pickBy";
+import reduce from "lodash/reduce";
 
 
 
@@ -119,7 +120,11 @@ export const base = {
 };
 
 export const factory = (struct) => {
-    let component = assign(clone(base), clone(struct.base || {}), struct);
+	let mixins = struct.mixins || [];
+	let sources = [base, struct.base || {}].concat(mixins);
+	sources.push(struct);
+    let component = reduce(sources, assign, {});
+
     validateComponent(component);
 
     let originalView = component.view.originalView || component.view;

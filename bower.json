@@ -1,0 +1,22 @@
+{
+  "name": "mithril-componentx",
+  "description": "Component factory for Mithriljs.",
+  "main": "index.js",
+  "authors": [
+    "ludbek"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "mithril",
+    "component",
+    "factory"
+  ],
+  "homepage": "https://github.com/ludbek/mithril-componentx",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
