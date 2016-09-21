@@ -45,14 +45,14 @@ export const base = {
 			for (let key in js) {
 				if (js.hasOwnProperty(key)) {
 					if (typeof js[key] === "object") {
-						css += leftPad + key + " {\n\r";
+						css += leftPad + key + " {\n";
 
 						css += genSingleLevel(js[key], indent + 2);
 
-						css += leftPad + "}\n\r";
+						css += leftPad + "}\n";
 					}
 					else {
-						css += leftPad + key + ": " + js[key] + ";\n\r";
+						css += leftPad + key + ": " + js[key] + ";\n";
 					}
 				}
 			}
@@ -71,7 +71,13 @@ export const base = {
 	localizeStyle (componentName, style) {
 		return style
 			.replace(/^([a-zA-Z0-9]+)/gm, `$1[data-component=${componentName}]`)
-			.replace(/^([.#:])/gm, `[data-component=${componentName}]$1`);
+			.replace(/^([.#:])/gm, `[data-component=${componentName}]$1`)
+			.replace(/^(\s\s)([a-zA-Z0-9]+)(.*?{)/gm, `$1$2[data-component=${componentName}]$3`)
+			.replace(/^(\s\s)([.#:])/gm, `$1[data-component=${componentName}]$2`)
+			// reverse for keyframe styles
+			.replace(/^(\s\s[0-9]+).*?{/gm, `$1% {`)
+			.replace(/^(\s\sfrom).*?{/gm, `$1 {`)
+			.replace(/^(\s\sto).*?{/gm, `$1 {`);
 	},
 
 	/*

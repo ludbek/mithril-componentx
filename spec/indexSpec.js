@@ -62,13 +62,54 @@ describe("base", () => {
 					}
 				},
 				"@keyframe xxx": {
-					yo: {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
 						xxx: "xxx"
 					}
 				}
 			};
 
-			console.log(base.genStyle(jsStyle));
+			let expected =
+`div {
+  xxx: xxx;
+  yyy: yyy;
+}
+div.class {
+  xxx: xxx;
+}
+div#id {
+  xxx: xxx;
+}
+.class {
+  xxx: xxx;
+}
+#id {
+  xxx: xxx;
+}
+@media xxx {
+  div {
+    xxx: xxx;
+  }
+}
+@keyframe xxx {
+  0% {
+    xxx: xxx;
+  }
+  from {
+    xxx: xxx;
+  }
+  to {
+    xxx: xxx;
+  }
+}
+`;
+
+			expect(base.genStyle(jsStyle)).to.equal(expected);
 		});
 	});
 
@@ -96,10 +137,19 @@ describe("base", () => {
 				"@media xxx": {
 					div: {
 						xxx: "xxx"
+					},
+					".class": {
+						xxx: "xxx"
 					}
 				},
 				"@keyframe xxx": {
-					yo: {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
 						xxx: "xxx"
 					}
 				}
@@ -125,10 +175,19 @@ describe("base", () => {
 				"@media xxx": {
 					"div[data-component=aComponent]": {
 						xxx: "xxx"
+					},
+					"[data-component=aComponent].class": {
+						xxx: "xxx"
 					}
 				},
-				"@keyframe": {
-					"yo": {
+				"@keyframe xxx": {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
 						xxx: "xxx"
 					}
 				}
@@ -136,7 +195,8 @@ describe("base", () => {
 		});
 
 		it("adds component to style to increase specificity", () => {
-			console.log(base.localizeStyle("aComponent", base.genStyle(inputStyle)));
+			let got = base.localizeStyle("aComponent", base.genStyle(inputStyle));
+			expect(got).to.eql(base.genStyle(expectedStyle));
 		});
 
 	});
@@ -154,7 +214,12 @@ describe("base", () => {
 			expect(style.textContent).to.equal("hello there");
 		});
 
-		it("won't attach the style for a component if it already attached.");
+		it("won't attach the style for a component if it already attached.", () => {
+			base.attachStyle("hello there", "aComponent");
+			let style = document.querySelectorAll("#aComponent-style");
+
+			expect(style.length).to.equal(1);
+		});
 		
 		after(() => {
 			delete global.document;
