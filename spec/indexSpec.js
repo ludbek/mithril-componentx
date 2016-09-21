@@ -1,5 +1,7 @@
 import {factory, base, validateComponent, isMithril1} from "../src/index.js";
 import chai from "chai";
+import {mocks} from "mock-browser";
+
 
 let expect = chai.expect;
 
@@ -35,6 +37,130 @@ describe("validateComponent", () => {
 
 
 describe("base", () => {
+	describe("genStyle", () => {
+		it("converts json to css", () => {
+			let jsStyle = {
+				div: {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div.class": {
+					xxx: "xxx"
+				},
+				"div#id": {
+					xxx: "xxx"
+				},
+				".class": {
+					xxx: "xxx"
+				},
+				"#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					div: {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe xxx": {
+					yo: {
+						xxx: "xxx"
+					}
+				}
+			};
+
+			console.log(base.genStyle(jsStyle));
+		});
+	});
+
+	describe("localizeStyle", () => {
+		let inputStyle, expectedStyle;
+
+		beforeEach(() => {
+			inputStyle = {
+				div: {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div.class": {
+					xxx: "xxx"
+				},
+				"div#id": {
+					xxx: "xxx"
+				},
+				".class": {
+					xxx: "xxx"
+				},
+				"#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					div: {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe xxx": {
+					yo: {
+						xxx: "xxx"
+					}
+				}
+			};
+
+			expectedStyle = {
+				"div[data-component=aComponent]": {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div[data-component=aComponent].class": {
+					xxx: "xxx"
+				},
+				"div[data-component=aComponent]#id": {
+					xxx: "xxx"
+				},
+				"[data-component=aComponent].class": {
+					xxx: "xxx"
+				},
+				"[data-component=aComponent]#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					"div[data-component=aComponent]": {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe": {
+					"yo": {
+						xxx: "xxx"
+					}
+				}
+			};
+		});
+
+		it("adds component to style to increase specificity", () => {
+			console.log(base.localizeStyle("aComponent", base.genStyle(inputStyle)));
+		});
+
+	});
+
+	describe("attachStyle", () => {
+		before(() => {
+			global.document = new mocks.MockBrowser().getDocument();
+		});
+
+		it("attaches given style to head", () => {
+			base.attachStyle("hello there", "aComponent");
+			let style = document.getElementById("aComponent-style");
+
+			expect(style).to.exist;
+			expect(style.textContent).to.equal("hello there");
+		});
+
+		it("won't attach the style for a component if it already attached.");
+		
+		after(() => {
+			delete global.document;
+		});
+	});
+
 	describe("insertUserClass", () => {
 		it("returns user supplied class if class list is empty", () => {
 			let classList = [];

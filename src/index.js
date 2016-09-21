@@ -34,8 +34,69 @@ export const isMithril1 = () => {
 };
 
 export const base = {
-	getInlineStyles () {},
-    getStyles () {},
+	/*
+	 * Generates stylesheet based upon data returned by getStyle()
+	 * */
+	genStyle (jsStyle) {
+		function genSingleLevel (js, indent = 1) {
+			let leftPad = new Array(indent).join(" ");
+			let css = "";
+
+			for (let key in js) {
+				if (js.hasOwnProperty(key)) {
+					if (typeof js[key] === "object") {
+						css += leftPad + key + " {\n\r";
+
+						css += genSingleLevel(js[key], indent + 2);
+
+						css += leftPad + "}\n\r";
+					}
+					else {
+						css += leftPad + key + ": " + js[key] + ";\n\r";
+					}
+				}
+			}
+
+			return css;
+		}
+
+
+		return genSingleLevel(jsStyle);
+	},
+
+	/*
+	 * Attaches component name to the style.
+	 * This increases specificity.
+	 * */
+	localizeStyle (componentName, style) {
+		return style
+			.replace(/^([a-zA-Z0-9]+)/gm, `$1[data-component=${componentName}]`)
+			.replace(/^([.#:])/gm, `[data-component=${componentName}]$1`);
+	},
+
+	/*
+	 * Returns json which will be used by genStyles() to generate stylesheet for this component.
+	 * */
+    getStyle (vnode) {},
+
+	/*
+	 * Attach styles to the head
+	 * */
+	attachStyle (style, componentName) {
+		if (!document.getElementById(componentName + "-style")) {
+			let node = document.createElement("style");
+			node.id = componentName + "-style";
+
+			if (node.styleSheet) {
+				node.styleSheet.cssText = style;
+			} else {
+				node.appendChild(document.createTextNode(style));
+			}
+
+			document.getElementsByTagName('head')[0].appendChild(node);
+		}
+	},
+
 	/*
 	 * Returns true for attirbutes which are selected for root dom of the component.
 	 * */
@@ -66,6 +127,7 @@ export const base = {
 	  }
 	},
 	getClass (classList, userClass) {
+		// attach component name to the classlist
 		return classNames(this.insertUserClass(classList, userClass));
 	},
 
@@ -139,6 +201,7 @@ export const factory = (struct) => {
 		component.controller = function (attrs, ...children) {
 			let vnode = component.getVnode(attrs, children, component);
 			if (component.oninit) {
+				// attach code that attaches style to head
 				component.oninit(vnode);
 			}
 			return ctrlReturn;
@@ -154,6 +217,7 @@ export const factory = (struct) => {
 	}
 	// for mithril 1.x.x
 	else {
+		// attach code that attaches style to head
 		component.view = function (vnode) {
 			vnode.attrs = this.getAttrs(vnode.attrs, component);
 			this.validateAttrs(vnode.attrs);

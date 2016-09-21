@@ -4,8 +4,9 @@
   "description": "Component factory for Mithriljs.",
   "main": "index.js",
   "scripts": {
-	"test:mithril0": "npm install mithril && mocha --compilers js:babel-register spec/indexSpec.js",
-	"test:mithril1": "npm install lhorie/mithril.js#rewrite && mocha --compilers js:babel-register spec/indexSpecMithril1.js",
+    "test:quick": "mocha --compilers js:babel-register spec/indexSpec.js",
+    "test:mithril0": "npm install mithril && mocha --compilers js:babel-register spec/indexSpec.js",
+    "test:mithril1": "npm install lhorie/mithril.js#rewrite && mocha --compilers js:babel-register spec/indexSpecMithril1.js",
     "test": "npm run test:mithril0 && npm run test:mithril1",
     "build": "babel --plugins transform-es2015-modules-commonjs src/ --out-dir lib/",
     "prepublish": "npm run build"
@@ -41,6 +42,7 @@
     "babel-register": "^6.11.5",
     "chai": "^3.5.0",
     "mocha": "^2.5.3",
+    "mock-browser": "^0.92.12",
     "webpack": "^1.12.14"
   },
   "dependencies": {
