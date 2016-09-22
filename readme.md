@@ -8,6 +8,8 @@ A component factory for [Mithril](https://github.com/lhorie/mithril.js).
 - Validates attributes passed to a component.
 - Extendable components.
 - Supports default attributes.
+- Supports mixins.
+- Localized style
 - Powerful class name generator for component's root.
 - Passes essential attributes directly to component's root.
 
@@ -189,6 +191,13 @@ let redButton = component({
 	}
 });
 
+# Mixins
+Components can have mixins.
+
+# Localized styling
+- Benefit of localized styling
+- pros and cons of inline style 
+- solution
 
 // change color to blue
 m(redButton, {color: "blue"}, "Blue button")
