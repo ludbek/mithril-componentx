@@ -89,18 +89,16 @@ export const base = {
 	 * Attach styles to the head
 	 * */
 	attachStyle (style, componentName) {
-		if (!document.getElementById(componentName + "-style")) {
-			let node = document.createElement("style");
-			node.id = componentName + "-style";
+		let node = document.createElement("style");
+		node.id = componentName + "-style";
 
-			if (node.styleSheet) {
-				node.styleSheet.cssText = style;
-			} else {
-				node.appendChild(document.createTextNode(style));
-			}
-
-			document.getElementsByTagName('head')[0].appendChild(node);
+		if (node.styleSheet) {
+			node.styleSheet.cssText = style;
+		} else {
+			node.appendChild(document.createTextNode(style));
 		}
+
+		document.getElementsByTagName('head')[0].appendChild(node);
 	},
 
 	/*
@@ -195,6 +193,18 @@ export const factory = (struct) => {
 
     validateComponent(component);
 
+	let originalOninit = component.oninit;
+	component.oninit = function (vnode) {
+		originalOninit.bind(component, vnode);
+
+		let style = component.getStyle(vnode);
+		let cName = component.name;
+
+		if (style && document.getElementById(cName + "-style")) return;
+
+		component.attachStyle(component.localizeStyle(cName, component.genStyle(style));
+	};
+
     let originalView = component.view.originalView || component.view;
 
 	// for mithril 0.2.x
@@ -207,7 +217,6 @@ export const factory = (struct) => {
 		component.controller = function (attrs, ...children) {
 			let vnode = component.getVnode(attrs, children, component);
 			if (component.oninit) {
-				// attach code that attaches style to head
 				component.oninit(vnode);
 			}
 			return ctrlReturn;
@@ -223,7 +232,6 @@ export const factory = (struct) => {
 	}
 	// for mithril 1.x.x
 	else {
-		// attach code that attaches style to head
 		component.view = function (vnode) {
 			vnode.attrs = this.getAttrs(vnode.attrs, component);
 			this.validateAttrs(vnode.attrs);

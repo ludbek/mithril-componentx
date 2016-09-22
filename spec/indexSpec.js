@@ -214,13 +214,6 @@ div#id {
 			expect(style.textContent).to.equal("hello there");
 		});
 
-		it("won't attach the style for a component if it already attached.", () => {
-			base.attachStyle("hello there", "aComponent");
-			let style = document.querySelectorAll("#aComponent-style");
-
-			expect(style.length).to.equal(1);
-		});
-		
 		after(() => {
 			delete global.document;
 		});
@@ -601,6 +594,19 @@ describe("factory", () => {
                 let returnObj = new aComponent.controller();
                 expect(returnObj.onunload).not.to.exist;
             });
+
+			it("attaches style to head if component's getStyle returns non null value.", () => {
+
+		
+			});
+
+
+			it("won't attach the style for a component if it already attached.", () => {
+				base.attachStyle("hello there", "aComponent");
+				let style = document.querySelectorAll("#aComponent-style");
+
+				expect(style.length).to.equal(1);
+			});
         });
     });
 });
