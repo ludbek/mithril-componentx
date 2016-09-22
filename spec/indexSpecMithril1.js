@@ -266,16 +266,25 @@ div#id {
 			expect(base.getAttrs({nye: 2}, component)).to.eql({cha: 1, nye: 2, rootAttrs: {}});
 		});
 
-		it("attaches class to root element attributes", () => {
+		it("attaches class to root element attributes.", () => {
 			let got = base.getAttrs({class: "aclass"}, component);
 			let expected = {class: "aclass", cha: 1, rootAttrs: {className: "aclass"}};
 			expect(got).to.eql(expected);
 		});
 
-		it("attaches 'id' to root element attributes", () => {
+		it("attaches 'id' to root element attributes.", () => {
 			let got = base.getAttrs({id: "aId"}, component);
 			let expected = {id: "aId", cha: 1, rootAttrs: {id: "aId"}};
 			expect(got).to.eql(expected);
+		});
+
+		it("attaches component name to root element attributes.", () => {
+			let component = factory({
+				name: "greenBottle",
+				view: function () {}});
+
+			let got = component.getAttrs({}, component);
+			expect(got.rootAttrs).to.eql({"data-component": "greenBottle"});
 		});
 	});
 

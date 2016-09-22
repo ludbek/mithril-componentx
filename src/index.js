@@ -158,6 +158,10 @@ export const base = {
 		if (newClassName) {
 			newAttrs.rootAttrs.className = newClassName;
 		}
+		
+		if (this.name) {
+			newAttrs.rootAttrs["data-component"] = this.name;
+		}
 
 		return newAttrs;
 	},
