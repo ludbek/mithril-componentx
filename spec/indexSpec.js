@@ -594,19 +594,48 @@ describe("factory", () => {
                 let returnObj = new aComponent.controller();
                 expect(returnObj.onunload).not.to.exist;
             });
+        });
+
+		describe(".oninit", () => {
+			let struct, component;
+
+			beforeEach(() => {
+				global.document = new mocks.MockBrowser().getDocument();
+
+				struct = {
+					name: "aComponent",
+					getStyle (vnode) {
+						return {
+							"div": {
+								"background-color": "#fff"
+							}
+						};
+					},
+					view () {}
+				};
+
+				component = factory(struct);
+			});
+
+
+			afterEach(() => {
+				delete global.document;
+			});
 
 			it("attaches style to head if component's getStyle returns non null value.", () => {
+				component.oninit();
 
-		
+				let style = document.getElementById("aComponent-style");
+				expect(style).to.exist;
 			});
 
 
 			it("won't attach the style for a component if it already attached.", () => {
-				base.attachStyle("hello there", "aComponent");
-				let style = document.querySelectorAll("#aComponent-style");
+				component.oninit();
 
+				let style = document.querySelectorAll("#aComponent-style");
 				expect(style.length).to.equal(1);
 			});
-        });
+		});
     });
 });

@@ -195,14 +195,18 @@ export const factory = (struct) => {
 
 	let originalOninit = component.oninit;
 	component.oninit = function (vnode) {
-		originalOninit.bind(component, vnode);
+		if (originalOninit) {
+			originalOninit.call(component, vnode);
+		}
 
 		let style = component.getStyle(vnode);
 		let cName = component.name;
 
 		if (style && document.getElementById(cName + "-style")) return;
 
-		component.attachStyle(component.localizeStyle(cName, component.genStyle(style));
+		component.attachStyle(
+				component.localizeStyle(cName, component.genStyle(style)),
+				cName);
 	};
 
     let originalView = component.view.originalView || component.view;
