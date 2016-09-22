@@ -202,7 +202,11 @@ export const factory = (struct) => {
 		let style = component.getStyle(vnode);
 		let cName = component.name;
 
-		if (style && document.getElementById(cName + "-style")) return;
+		if (style && !cName) {
+			throw Error("Cannot style this component without a name. Please name this component.");
+		}
+
+		if (!style || style && document.getElementById(cName + "-style")) return;
 
 		component.attachStyle(
 				component.localizeStyle(cName, component.genStyle(style)),

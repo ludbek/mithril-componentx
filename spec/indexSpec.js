@@ -376,6 +376,14 @@ div#id {
 describe("factory", () => {
 	let vdom;
 
+	beforeEach(() => {
+		global.document = new mocks.MockBrowser().getDocument();
+	});
+
+	afterEach(() => {
+		delete global.document;
+	});
+
     it("validates component", () => {
         expect(factory.bind(factory, {})).to.throw(Error);
 
@@ -600,8 +608,6 @@ describe("factory", () => {
 			let struct, component;
 
 			beforeEach(() => {
-				global.document = new mocks.MockBrowser().getDocument();
-
 				struct = {
 					name: "aComponent",
 					getStyle (vnode) {
@@ -617,10 +623,6 @@ describe("factory", () => {
 				component = factory(struct);
 			});
 
-
-			afterEach(() => {
-				delete global.document;
-			});
 
 			it("attaches style to head if component's getStyle returns non null value.", () => {
 				component.oninit();

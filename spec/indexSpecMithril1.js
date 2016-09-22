@@ -1,5 +1,6 @@
 import {factory, base, validateComponent, isMithril1} from "../src/index.js";
 import chai from "chai";
+import {mocks} from "mock-browser";
 
 let expect = chai.expect;
 
@@ -35,6 +36,188 @@ describe("validateComponent", () => {
 
 
 describe("base", () => {
+	describe("genStyle", () => {
+		it("converts json to css", () => {
+			let jsStyle = {
+				div: {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div.class": {
+					xxx: "xxx"
+				},
+				"div#id": {
+					xxx: "xxx"
+				},
+				".class": {
+					xxx: "xxx"
+				},
+				"#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					div: {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe xxx": {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
+						xxx: "xxx"
+					}
+				}
+			};
+
+			let expected =
+`div {
+  xxx: xxx;
+  yyy: yyy;
+}
+div.class {
+  xxx: xxx;
+}
+div#id {
+  xxx: xxx;
+}
+.class {
+  xxx: xxx;
+}
+#id {
+  xxx: xxx;
+}
+@media xxx {
+  div {
+    xxx: xxx;
+  }
+}
+@keyframe xxx {
+  0% {
+    xxx: xxx;
+  }
+  from {
+    xxx: xxx;
+  }
+  to {
+    xxx: xxx;
+  }
+}
+`;
+
+			expect(base.genStyle(jsStyle)).to.equal(expected);
+		});
+	});
+
+	describe("localizeStyle", () => {
+		let inputStyle, expectedStyle;
+
+		beforeEach(() => {
+			inputStyle = {
+				div: {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div.class": {
+					xxx: "xxx"
+				},
+				"div#id": {
+					xxx: "xxx"
+				},
+				".class": {
+					xxx: "xxx"
+				},
+				"#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					div: {
+						xxx: "xxx"
+					},
+					".class": {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe xxx": {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
+						xxx: "xxx"
+					}
+				}
+			};
+
+			expectedStyle = {
+				"div[data-component=aComponent]": {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div[data-component=aComponent].class": {
+					xxx: "xxx"
+				},
+				"div[data-component=aComponent]#id": {
+					xxx: "xxx"
+				},
+				"[data-component=aComponent].class": {
+					xxx: "xxx"
+				},
+				"[data-component=aComponent]#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					"div[data-component=aComponent]": {
+						xxx: "xxx"
+					},
+					"[data-component=aComponent].class": {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe xxx": {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
+						xxx: "xxx"
+					}
+				}
+			};
+		});
+
+		it("adds component to style to increase specificity", () => {
+			let got = base.localizeStyle("aComponent", base.genStyle(inputStyle));
+			expect(got).to.eql(base.genStyle(expectedStyle));
+		});
+
+	});
+
+	describe("attachStyle", () => {
+		before(() => {
+			global.document = new mocks.MockBrowser().getDocument();
+		});
+
+		it("attaches given style to head", () => {
+			base.attachStyle("hello there", "aComponent");
+			let style = document.getElementById("aComponent-style");
+
+			expect(style).to.exist;
+			expect(style.textContent).to.equal("hello there");
+		});
+
+		after(() => {
+			delete global.document;
+		});
+	});
+
 	describe("insertUserClass", () => {
 		it("returns user supplied class if class list is empty", () => {
 			let classList = [];
@@ -193,9 +376,15 @@ describe("factory", () => {
 	let vdom;
 
 	beforeEach(() => {
+		global.document = new mocks.MockBrowser().getDocument();
+
 		vdom = {
 			attrs: {}
 		};
+	});
+
+	afterEach(() => {
+		delete global.document;
 	});
 
     it("validates component", () => {
@@ -366,5 +555,50 @@ describe("factory", () => {
             });
 
         });
+
+		describe(".oninit", () => {
+			let struct, component;
+
+			beforeEach(() => {
+				struct = {
+					name: "aComponent",
+					getStyle (vnode) {
+						return {
+							"div": {
+								"background-color": "#fff"
+							}
+						};
+					},
+					view () {}
+				};
+
+				component = factory(struct);
+			});
+
+
+			it("attaches style to head if component's getStyle returns non null value.", () => {
+				component.oninit();
+
+				let style = document.getElementById("aComponent-style");
+				expect(style).to.exist;
+			});
+
+
+			it("won't attach the style for a component if it already attached.", () => {
+				component.oninit();
+
+				let style = document.querySelectorAll("#aComponent-style");
+				expect(style.length).to.equal(1);
+			});
+
+			it("complains if component has style but not name.", () => {
+				component.getStyle = function () {
+					return {};
+				}
+				component.name = undefined;
+
+				expect(component.oninit.bind(component)).to.throw(Error);
+			});
+		});
     });
 });
