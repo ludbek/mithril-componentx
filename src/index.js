@@ -61,7 +61,7 @@ export const base = {
 		}
 
 
-		return genSingleLevel(jsStyle);
+		return "\n" + genSingleLevel(jsStyle);
 	},
 
 	/*

@@ -74,7 +74,8 @@ describe("base", () => {
 			};
 
 			let expected =
-`div {
+`
+div {
   xxx: xxx;
   yyy: yyy;
 }
