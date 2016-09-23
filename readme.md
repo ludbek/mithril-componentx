@@ -191,16 +191,112 @@ let redButton = component({
 	}
 });
 
-# Mixins
-Components can have mixins.
-
-# Localized styling
-- Benefit of localized styling
-- pros and cons of inline style 
-- solution
-
 // change color to blue
 m(redButton, {color: "blue"}, "Blue button")
+```
+
+
+# Mixins
+Components can share mixins.
+
+```javascript
+let buttonValidator : {
+	validateAttrs (attrs) {
+		if (!attrs.label) throw Error("Please pass a label for the button.");
+	}
+}
+
+let roundedCorners: {
+	getDefaultAttrs (attrs) {
+		return {
+			style: {
+				"border-radius": "5px"
+		   }
+		}
+	}
+}
+
+let sharpCorners: {
+	getDefaultAttrs (attrs) {
+		return {
+			style: {
+				"border-radius": "0px"
+		   }
+		}
+	}
+}
+
+
+let button1 = component({
+	mixins: [buttonValidator, roundedCorners],
+	view (vnode) {
+		return m("button", vnode.attrs.rootAttrs, vnode.attrs.label);
+	}
+});
+
+
+let button1 = component({
+	mixins: [buttonValidator, sharpCorners],
+	view (vnode) {
+		return m("button", vnode.attrs.rootAttrs, vnode.attrs.label);
+	}
+});
+```
+
+# Localized styling
+The main problem with css is they reside in separate files and they are static.
+One solution to this problem is inline styles. The components created with this
+component factory already support styling component's root dom. But still inline
+styling suffers from following problem:
+
+- does not support pseudo classes
+- does not support media query
+- styles applied at parent element does not affect its child elements
+
+`mithril-componentx` supports localized styling. Components can define `getStyle()` method which
+returns JSON. Thus returned JSON is converted to proper CSS and attached
+to head just before component is mounted to the DOM. The style is attached only once per component type.
+
+```javascript
+let dialog  = component({
+	name: "dialog", // name is required for localizing style, else will throw error.
+	getStyle (vnode) {
+		// the JSON is one to one mapping of CSS as we will see later
+		return {
+			".tbl": {
+				"display": "table",
+				"height": "100%"
+			},
+			".tbl .tbl-cl": {
+				"display": "table-cell",
+				"vertical-align": "middle",
+				"text-align": "center"
+			}
+		};
+	},
+	view (vnode) {
+		// rootAttrs has attribute which helps localize the style
+		// in this case its [data-component=dialog]
+		return m(".tbl", vnode.attrs.rootAttrs,
+			m(".tbl-cl", vnode.children));
+	}
+});
+```
+
+The style in above example is attached to head in following format.
+```css
+<style id="dialog-style">
+// data-component is the attribute of root dom
+[data-component=dialog].tbl {
+  display: table;
+  height: 100%;
+}
+[data-component=dialog].tbl .tbl-cl {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+</style>
 ```
 
 # Passing attributes to root of a component
