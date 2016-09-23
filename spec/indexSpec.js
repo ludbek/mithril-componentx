@@ -270,7 +270,7 @@ div#id {
 
 		it("attaches class to root element attributes", () => {
 			let got = base.getAttrs({class: "aclass"}, component);
-			let expected = {class: "aclass", cha: 1, rootAttrs: {className: "aclass"}};
+			let expected = {class: "aclass", cha: 1, rootAttrs: {class: "aclass"}};
 			expect(got).to.eql(expected);
 		});
 
@@ -534,24 +534,24 @@ describe("factory", () => {
                 expect(check.attrs).to.eql({attr1: 1, attr2: 2, rootAttrs: {}});
             });
 
-            it("'s vnode.attr.rootAttrs.className is constructed out of class list", () => {
+            it("'s vnode.attr.rootAttrs.class is constructed out of class list", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "bclass"];
                 };
 
                 let aComponent = factory(struct);
                 aComponent.view("ctrl", {attr2: 2});
-                expect(check.attrs.rootAttrs.className).to.equal("aclass bclass");
+                expect(check.attrs.rootAttrs.class).to.equal("aclass bclass");
             });
 
-            it("'s vnode.attr.rootAttrs.className includes user supplied class", () => {
+            it("'s vnode.attr.rootAttrs.class includes user supplied class", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "cclass"];
                 };
 
                 let aComponent = factory(struct);
                 aComponent.view("ctrl", {class: "bclass"});
-                expect(check.attrs.rootAttrs.className).to.equal("aclass bclass cclass");
+                expect(check.attrs.rootAttrs.class).to.equal("aclass bclass cclass");
             });
 
         });
