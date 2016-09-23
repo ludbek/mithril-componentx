@@ -156,7 +156,7 @@ export const base = {
 
 		let newClassName = this.getClass(component.getClassList(newAttrs), newAttrs.class);
 		if (newClassName) {
-			newAttrs.rootAttrs.className = newClassName;
+			newAttrs.rootAttrs.class = newClassName;
 		}
 		
 		if (this.name) {
