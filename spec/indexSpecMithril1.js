@@ -253,28 +253,31 @@ div#id {
 	describe("getAttrs", () => {
 		let component;
 		beforeEach(() => {
-			component = {
+			component = factory({
 				getDefaultAttrs () {
 					return {cha: 1};
 				},
 				getClassList () {
 					return [];
-				}
-			};
+				},
+				view () {}
+			});
 		});
 
 		it("merges user supplied attributes with default attributes.", () => {
-			expect(base.getAttrs({nye: 2}, component)).to.eql({cha: 1, nye: 2, rootAttrs: {}});
+			let got = component.getAttrs({nye: 2});
+			let expected = {cha: 1, nye: 2, rootAttrs: {}};
+			expect(got).to.eql(expected);
 		});
 
 		it("attaches class to root element attributes.", () => {
-			let got = base.getAttrs({class: "aclass"}, component);
+			let got = component.getAttrs({class: "aclass"});
 			let expected = {class: "aclass", cha: 1, rootAttrs: {class: "aclass"}};
 			expect(got).to.eql(expected);
 		});
 
 		it("attaches 'id' to root element attributes.", () => {
-			let got = base.getAttrs({id: "aId"}, component);
+			let got = component.getAttrs({id: "aId"});
 			let expected = {id: "aId", cha: 1, rootAttrs: {id: "aId"}};
 			expect(got).to.eql(expected);
 		});
@@ -311,42 +314,43 @@ div#id {
 	  let component;
 
 	  beforeEach(() => {
-		component = {
+		component = factory({
 		  getDefaultAttrs () {
 			  return {nye: 2};
 		  },
 		  getClassList () {
 			return [];
-		  }
-		};
+		  },
+		  view () {}
+		});
 	  });
 
 		it("attaches given attribute merged with default attributes to vnode.attrs", () => {
 			let attrs = {cha: 1};
 			let children = ["child"];
-			let got = base.getVnode(attrs, children, component);
+			let got = component.getVnode(attrs, children);
 			expect(got.attrs).to.eql({cha: 1, nye: 2, rootAttrs: {}});
 		});
 
 		it("attaches default attribute to vnode.attrs if no attribute was passed", () => {
 			let children = ["child"];
-			let got = base.getVnode([], children, component);
+			let got = component.getVnode([], children);
 			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
 		});
 
 		it("attaches given children to vnode.children", () => {
 			let children = ["child"];
-			let got = base.getVnode({}, children, component);
+			let got = component.getVnode({}, children);
 			expect(got.children).to.eql(children);
 		});
 
 		it("identifies the child node even if attribute is absent", () => {
-			let got = base.getVnode(1, [2], component);
+			let got = component.getVnode(1, [2]);
 			expect(got.children).to.eql([1,2]);
 		});
 
 		it("returns object with attributes, children and state", () => {
-			let got = base.getVnode({}, [], component);
+			let got = component.getVnode({}, []);
 			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
 			expect(got.children).to.eql([]);
 			expect(got.state).to.eql(component);

@@ -1,5 +1,5 @@
 import assign from "lodash/assign";
-import clone from "lodash/clone";
+import cloneDeep from "lodash/cloneDeep";
 import isObject from "lodash/isObject";
 import isFunction from "lodash/isFunction";
 import classNames from "classnames";
@@ -135,26 +135,26 @@ export const base = {
 		return classNames(this.insertUserClass(classList, userClass));
 	},
 
-	getAttrs (attrs, component) {
-		let defaultAttrs = component.getDefaultAttrs(attrs);
+	getAttrs (attrs) {
+		let defaultAttrs = this.getDefaultAttrs(attrs);
 		let newAttrs = {};
 
 		if (!isMithril1()) {
 			if(this.isAttr(attrs)) {
-				newAttrs = merge(clone(defaultAttrs), attrs);
+				newAttrs = merge(cloneDeep(defaultAttrs), attrs);
 			}
 			else {
 				newAttrs = defaultAttrs;
 			}
 		}
 		else {
-			newAttrs = merge(clone(defaultAttrs), attrs);
+			newAttrs = merge(cloneDeep(defaultAttrs), attrs);
 		}
 
 
 		newAttrs.rootAttrs = merge(newAttrs.rootAttrs, pickBy(newAttrs, this.isRootAttr));
 
-		let newClassName = this.getClass(component.getClassList(newAttrs), newAttrs.class);
+		let newClassName = this.getClass(this.getClassList(newAttrs), newAttrs.class);
 		if (newClassName) {
 			newAttrs.rootAttrs.class = newClassName;
 		}
@@ -166,16 +166,16 @@ export const base = {
 		return newAttrs;
 	},
 
-	getVnode (attrs, children, component) {
-	  let newAttrs = this.getAttrs(attrs, component);
+	getVnode (attrs, children) {
+	  let newAttrs = this.getAttrs(attrs);
 
 	  if (this.isAttr(attrs)) {
-		return {attrs: newAttrs, children, state : component};
+		return {attrs: newAttrs, children, state : this};
 	  }
 
 	  children.unshift(attrs);
 
-	  return {attrs: newAttrs, children, state: component};
+	  return {attrs: newAttrs, children, state: this};
 	},
 
     getDefaultAttrs () {
@@ -221,25 +221,24 @@ export const factory = (struct) => {
 
 	// for mithril 0.2.x
 	if (!isMithril1()) {
-		let ctrlReturn = {};
-		if (component.onremove) {
-			ctrlReturn.onunload = component.onremove.bind(component);
-		}
-
 		component.controller = function (attrs, ...children) {
-			let vnode = component.getVnode(attrs, children, component);
-			if (component.oninit) {
-				component.oninit(vnode);
+			let ctrl = cloneDeep(component);
+
+			if (component.onremove) {
+				ctrl.onunload = component.onremove.bind(ctrl);
 			}
-			return ctrlReturn;
+
+			ctrl.oninit && ctrl.oninit({attrs, children});
+
+			return ctrl;
 		};
 
 		component.view = function (ctrl, attrs, ...children) {
-			let vnode = this.getVnode(attrs, children, component);
+			let vnode = ctrl.getVnode(attrs, children);
 
-			this.validateAttrs(vnode.attrs);
+			ctrl.validateAttrs(vnode.attrs);
 
-			return originalView.call(this, vnode);
+			return originalView.call(ctrl, vnode);
 		};
 	}
 	// for mithril 1.x.x
