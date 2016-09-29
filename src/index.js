@@ -228,7 +228,7 @@ export const factory = (struct) => {
 				ctrl.onunload = component.onremove.bind(ctrl);
 			}
 
-			ctrl.oninit && ctrl.oninit({attrs, children});
+			ctrl.oninit && ctrl.oninit(ctrl.getVnode(attrs, children));
 
 			return ctrl;
 		};
@@ -244,7 +244,7 @@ export const factory = (struct) => {
 	// for mithril 1.x.x
 	else {
 		component.view = function (vnode) {
-			vnode.attrs = this.getAttrs(vnode.attrs, component);
+			vnode.attrs = this.getAttrs(vnode.attrs);
 			this.validateAttrs(vnode.attrs);
 
 			return originalView.call(this, vnode);

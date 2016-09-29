@@ -592,8 +592,9 @@ describe("factory", () => {
                 let aComponent = factory(struct);
                 let returnObj = new aComponent.controller({attr1: 1}, "child1", "child2");
 
-                expect(check.attrs).to.eql({attr1: 1});
+                expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
                 expect(check.children).to.eql(["child1", "child2"]);
+				expect(check.state).to.exist;
             });
 
             it("binds oninit to component", () => {
