@@ -151,16 +151,17 @@ export const base = {
 			newAttrs = merge(cloneDeep(defaultAttrs), attrs);
 		}
 
+		newAttrs.rootAttrs = newAttrs.rootAttrs || {};
+
+		if (this.name) {
+			newAttrs.rootAttrs["data-component"] = this.name;
+		}
 
 		newAttrs.rootAttrs = merge(newAttrs.rootAttrs, pickBy(newAttrs, this.isRootAttr));
 
 		let newClassName = this.getClass(this.getClassList(newAttrs), newAttrs.class);
 		if (newClassName) {
 			newAttrs.rootAttrs.class = newClassName;
-		}
-		
-		if (this.name) {
-			newAttrs.rootAttrs["data-component"] = this.name;
 		}
 
 		return newAttrs;
