@@ -291,6 +291,16 @@ div#id {
 			let got = component.getAttrs({});
 			expect(got.rootAttrs).to.eql({"data-component": "greenBottle"});
 		});
+
+		it("overrides component's name with attrs[data-component].", () => {
+			let aComponent = factory({
+				name: "aComponent",
+				view () {}
+			});
+
+			let got = aComponent.getAttrs({"data-component": "bComponent"});
+			expect(got.rootAttrs["data-component"]).to.equal("bComponent");
+		});
 	});
 
 	describe("isAttr", () => {
