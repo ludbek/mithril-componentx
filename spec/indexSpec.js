@@ -395,6 +395,24 @@ div#id {
 			expect(base.isRootAttr(null, "keydata-1")).to.equal(false);
 		});
 	});
+
+	describe("is", () => {
+		it("returns true if component is of given type.", () => {
+			let fruit = factory({
+				name: "fruit",
+				view () {}
+			});
+
+			let apple = factory({
+				name: "apple",
+				base: fruit,
+			});
+
+			expect(apple.is("apple")).to.equal(true);
+			expect(apple.is("fruit")).to.equal(true);
+			expect(apple.is("banana")).to.equal(false);
+		});
+	});
 });
 
 describe("factory", () => {

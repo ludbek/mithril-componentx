@@ -187,7 +187,18 @@ export const base = {
         return [];
     },
 
-    validateAttrs (attrs) {}
+    validateAttrs (attrs) {},
+
+	is(type) {
+		if (this.name === type) {
+			return true;
+		}
+		else if (this.base) {
+			return this.base.is(type);
+		}
+
+		return false;
+	}
 };
 
 export const factory = (struct) => {

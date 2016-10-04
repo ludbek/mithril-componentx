@@ -290,6 +290,16 @@ div#id {
 			let got = component.getAttrs({}, component);
 			expect(got.rootAttrs).to.eql({"data-component": "greenBottle"});
 		});
+
+		it("overrides component's name with attrs[data-component].", () => {
+			let aComponent = factory({
+				name: "aComponent",
+				view () {}
+			});
+
+			let got = aComponent.getAttrs({"data-component": "bComponent"});
+			expect(got.rootAttrs["data-component"]).to.equal("bComponent");
+		});
 	});
 
 	describe("isAttr", () => {
@@ -382,6 +392,24 @@ div#id {
 		it("returns false for rest.", () => {
 			expect(base.isRootAttr(null, "xon")).to.equal(false);
 			expect(base.isRootAttr(null, "keydata-1")).to.equal(false);
+		});
+	});
+
+	describe("is", () => {
+		it("returns true if component is of given type.", () => {
+			let fruit = factory({
+				name: "fruit",
+				view () {}
+			});
+
+			let apple = factory({
+				name: "apple",
+				base: fruit,
+			});
+
+			expect(apple.is("apple")).to.equal(true);
+			expect(apple.is("fruit")).to.equal(true);
+			expect(apple.is("banana")).to.equal(false);
 		});
 	});
 });
