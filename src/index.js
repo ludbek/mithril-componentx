@@ -106,7 +106,14 @@ export const base = {
 	 * */
 	isRootAttr (value, key) {
 		// TODO: if mithril 1.x.x component lifecycle return false
-		return /^(id|style|on.*|data-.*|config)$/.test(key)? true: false;
+		try {
+			return /^(id|style|on.*|data-.*|config)$/.test(key)? true: false;
+		}
+		catch (err) {
+			if (err instanceof TypeError) {
+				return false;
+			}
+		}
 	},
 
 	/*
@@ -135,7 +142,7 @@ export const base = {
 		return classNames(this.insertUserClass(classList, userClass));
 	},
 
-	getAttrs (attrs) {
+	getAttrs (attrs = {}) {
 		let defaultAttrs = this.getDefaultAttrs(attrs);
 		let newAttrs = {};
 
