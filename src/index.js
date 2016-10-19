@@ -219,7 +219,7 @@ export const factory = (struct) => {
 	let originalOninit = component.oninit;
 	component.oninit = function (vnode) {
 		if (originalOninit) {
-			originalOninit.call(component, vnode);
+			originalOninit.call(this, vnode);
 		}
 
 		let style = component.getStyle(vnode);
