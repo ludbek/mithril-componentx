@@ -628,7 +628,7 @@ describe("factory", () => {
             it("binds oninit to component", () => {
                 let aComponent = factory(struct);
                 let returnObj = new aComponent.controller("attr", "child1", "child2");
-                expect(checkThis).to.equal(aComponent);
+                expect(checkThis).to.equal(returnObj);
             });
 
             it("returns object with onunload if onremove exists", () => {
