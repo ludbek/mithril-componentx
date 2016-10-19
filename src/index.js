@@ -107,7 +107,7 @@ export const base = {
 	isRootAttr (value, key) {
 		// TODO: if mithril 1.x.x component lifecycle return false
 		try {
-			return /^(id|style|on.*|data-.*|config)$/.test(key)? true: false;
+			return /^(key|id|style|on.*|data-.*|config)$/.test(key)? true: false;
 		}
 		catch (err) {
 			if (err instanceof TypeError) {
