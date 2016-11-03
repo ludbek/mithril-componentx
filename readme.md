@@ -210,6 +210,23 @@ m(button, {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "re
 // vnode.attrs.rootAttrs = {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "red"}}
 ```
 
+Override `isRootAttr` method to change the default behaviour.
+
+```javascript
+let button = component({
+	isRootAttr (value, key) {
+		return /^(onclick|style)$/.test(key)? true: false;
+	},
+	view (vnode) {
+		let rootAttrs = vnode.attrs.rootAttrs;
+		return m("button", rootAttrs, vnode.children);
+	}
+});
+
+m(button, {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "red"}}, "Like");
+// vnode.attrs.rootAttrs = {onclick: acallback,style: {color: "red"}}
+```
+
 # Class name for component's root
 Class name for component's root is generated from `getClassList()` and is made available at
 `vnode.attrs.rootAttrs.className`. Class name is generated using excellent [classnames](https://github.com/JedWatson/classnames).
