@@ -3,3 +3,4 @@ lib/
 .tern-port
 .brofile
 npm-debug.log
+.brotasks

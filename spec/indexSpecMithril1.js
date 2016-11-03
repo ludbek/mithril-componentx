@@ -1,5 +1,6 @@
 import {factory, base, validateComponent, isMithril1} from "../src/index.js";
 import chai from "chai";
+import {mocks} from "mock-browser";
 
 let expect = chai.expect;
 
@@ -35,6 +36,189 @@ describe("validateComponent", () => {
 
 
 describe("base", () => {
+	describe("genStyle", () => {
+		it("converts json to css", () => {
+			let jsStyle = {
+				div: {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div.class": {
+					xxx: "xxx"
+				},
+				"div#id": {
+					xxx: "xxx"
+				},
+				".class": {
+					xxx: "xxx"
+				},
+				"#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					div: {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe xxx": {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
+						xxx: "xxx"
+					}
+				}
+			};
+
+			let expected =
+`
+div {
+  xxx: xxx;
+  yyy: yyy;
+}
+div.class {
+  xxx: xxx;
+}
+div#id {
+  xxx: xxx;
+}
+.class {
+  xxx: xxx;
+}
+#id {
+  xxx: xxx;
+}
+@media xxx {
+  div {
+    xxx: xxx;
+  }
+}
+@keyframe xxx {
+  0% {
+    xxx: xxx;
+  }
+  from {
+    xxx: xxx;
+  }
+  to {
+    xxx: xxx;
+  }
+}
+`;
+
+			expect(base.genStyle(jsStyle)).to.equal(expected);
+		});
+	});
+
+	describe("localizeStyle", () => {
+		let inputStyle, expectedStyle;
+
+		beforeEach(() => {
+			inputStyle = {
+				div: {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div.class": {
+					xxx: "xxx"
+				},
+				"div#id": {
+					xxx: "xxx"
+				},
+				".class": {
+					xxx: "xxx"
+				},
+				"#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					div: {
+						xxx: "xxx"
+					},
+					".class": {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe xxx": {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
+						xxx: "xxx"
+					}
+				}
+			};
+
+			expectedStyle = {
+				"div[data-component=aComponent]": {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
+				"div[data-component=aComponent].class": {
+					xxx: "xxx"
+				},
+				"div[data-component=aComponent]#id": {
+					xxx: "xxx"
+				},
+				"[data-component=aComponent].class": {
+					xxx: "xxx"
+				},
+				"[data-component=aComponent]#id": {
+					xxx: "xxx"
+				},
+				"@media xxx": {
+					"div[data-component=aComponent]": {
+						xxx: "xxx"
+					},
+					"[data-component=aComponent].class": {
+						xxx: "xxx"
+					}
+				},
+				"@keyframe xxx": {
+					"0%": {
+						xxx: "xxx"
+					},
+					from: {
+						xxx: "xxx"
+					},
+					to: {
+						xxx: "xxx"
+					}
+				}
+			};
+		});
+
+		it("adds component to style to increase specificity", () => {
+			let got = base.localizeStyle("aComponent", base.genStyle(inputStyle));
+			expect(got).to.eql(base.genStyle(expectedStyle));
+		});
+
+	});
+
+	describe("attachStyle", () => {
+		before(() => {
+			global.document = new mocks.MockBrowser().getDocument();
+		});
+
+		it("attaches given style to head", () => {
+			base.attachStyle("hello there", "aComponent");
+			let style = document.getElementById("aComponent-style");
+
+			expect(style).to.exist;
+			expect(style.textContent).to.equal("hello there");
+		});
+
+		after(() => {
+			delete global.document;
+		});
+	});
+
 	describe("insertUserClass", () => {
 		it("returns user supplied class if class list is empty", () => {
 			let classList = [];
@@ -69,30 +253,52 @@ describe("base", () => {
 	describe("getAttrs", () => {
 		let component;
 		beforeEach(() => {
-			component = {
+			component = factory({
 				getDefaultAttrs () {
 					return {cha: 1};
 				},
 				getClassList () {
 					return [];
-				}
-			};
+				},
+				view () {}
+			});
 		});
 
 		it("merges user supplied attributes with default attributes.", () => {
-			expect(base.getAttrs({nye: 2}, component)).to.eql({cha: 1, nye: 2, rootAttrs: {}});
-		});
-
-		it("attaches class to root element attributes", () => {
-			let got = base.getAttrs({class: "aclass"}, component);
-			let expected = {class: "aclass", cha: 1, rootAttrs: {className: "aclass"}};
+			let got = component.getAttrs({nye: 2});
+			let expected = {cha: 1, nye: 2, rootAttrs: {}};
 			expect(got).to.eql(expected);
 		});
 
-		it("attaches 'id' to root element attributes", () => {
-			let got = base.getAttrs({id: "aId"}, component);
+		it("attaches class to root element attributes.", () => {
+			let got = component.getAttrs({class: "aclass"});
+			let expected = {class: "aclass", cha: 1, rootAttrs: {class: "aclass"}};
+			expect(got).to.eql(expected);
+		});
+
+		it("attaches 'id' to root element attributes.", () => {
+			let got = component.getAttrs({id: "aId"});
 			let expected = {id: "aId", cha: 1, rootAttrs: {id: "aId"}};
 			expect(got).to.eql(expected);
+		});
+
+		it("attaches component name to root element attributes.", () => {
+			let component = factory({
+				name: "greenBottle",
+				view: function () {}});
+
+			let got = component.getAttrs({}, component);
+			expect(got.rootAttrs).to.eql({"data-component": "greenBottle"});
+		});
+
+		it("overrides component's name with attrs[data-component].", () => {
+			let aComponent = factory({
+				name: "aComponent",
+				view () {}
+			});
+
+			let got = aComponent.getAttrs({"data-component": "bComponent"});
+			expect(got.rootAttrs["data-component"]).to.equal("bComponent");
 		});
 	});
 
@@ -118,42 +324,43 @@ describe("base", () => {
 	  let component;
 
 	  beforeEach(() => {
-		component = {
+		component = factory({
 		  getDefaultAttrs () {
 			  return {nye: 2};
 		  },
 		  getClassList () {
 			return [];
-		  }
-		};
+		  },
+		  view () {}
+		});
 	  });
 
 		it("attaches given attribute merged with default attributes to vnode.attrs", () => {
 			let attrs = {cha: 1};
 			let children = ["child"];
-			let got = base.getVnode(attrs, children, component);
+			let got = component.getVnode(attrs, children);
 			expect(got.attrs).to.eql({cha: 1, nye: 2, rootAttrs: {}});
 		});
 
 		it("attaches default attribute to vnode.attrs if no attribute was passed", () => {
 			let children = ["child"];
-			let got = base.getVnode([], children, component);
+			let got = component.getVnode([], children);
 			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
 		});
 
 		it("attaches given children to vnode.children", () => {
 			let children = ["child"];
-			let got = base.getVnode({}, children, component);
+			let got = component.getVnode({}, children);
 			expect(got.children).to.eql(children);
 		});
 
 		it("identifies the child node even if attribute is absent", () => {
-			let got = base.getVnode(1, [2], component);
+			let got = component.getVnode(1, [2]);
 			expect(got.children).to.eql([1,2]);
 		});
 
 		it("returns object with attributes, children and state", () => {
-			let got = base.getVnode({}, [], component);
+			let got = component.getVnode({}, []);
 			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
 			expect(got.children).to.eql([]);
 			expect(got.state).to.eql(component);
@@ -187,15 +394,39 @@ describe("base", () => {
 			expect(base.isRootAttr(null, "keydata-1")).to.equal(false);
 		});
 	});
+
+	describe("is", () => {
+		it("returns true if component is of given type.", () => {
+			let fruit = factory({
+				name: "fruit",
+				view () {}
+			});
+
+			let apple = factory({
+				name: "apple",
+				base: fruit,
+			});
+
+			expect(apple.is("apple")).to.equal(true);
+			expect(apple.is("fruit")).to.equal(true);
+			expect(apple.is("banana")).to.equal(false);
+		});
+	});
 });
 
 describe("factory", () => {
 	let vdom;
 
 	beforeEach(() => {
+		global.document = new mocks.MockBrowser().getDocument();
+
 		vdom = {
 			attrs: {}
 		};
+	});
+
+	afterEach(() => {
+		delete global.document;
 	});
 
     it("validates component", () => {
@@ -344,17 +575,17 @@ describe("factory", () => {
                 expect(check.attrs).to.eql({attr1: 1, attr2: 2, rootAttrs: {}});
             });
 
-            it("'s vnode.attr.rootAttrs.className is constructed out of class list", () => {
+            it("'s vnode.attr.rootAttrs.class is constructed out of class list", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "bclass"];
                 };
 
                 let aComponent = factory(struct);
                 aComponent.view(vdom);
-                expect(check.attrs.rootAttrs.className).to.equal("aclass bclass");
+                expect(check.attrs.rootAttrs.class).to.equal("aclass bclass");
             });
 
-            it("'s vnode.attr.rootAttrs.className includes user supplied class", () => {
+            it("'s vnode.attr.rootAttrs.class includes user supplied class", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "cclass"];
                 };
@@ -362,9 +593,54 @@ describe("factory", () => {
                 let aComponent = factory(struct);
 				vdom.attrs.class = "bclass";
                 aComponent.view(vdom);
-                expect(check.attrs.rootAttrs.className).to.equal("aclass bclass cclass");
+                expect(check.attrs.rootAttrs.class).to.equal("aclass bclass cclass");
             });
 
         });
+
+		describe(".oninit", () => {
+			let struct, component;
+
+			beforeEach(() => {
+				struct = {
+					name: "aComponent",
+					getStyle (vnode) {
+						return {
+							"div": {
+								"background-color": "#fff"
+							}
+						};
+					},
+					view () {}
+				};
+
+				component = factory(struct);
+			});
+
+
+			it("attaches style to head if component's getStyle returns non null value.", () => {
+				component.oninit();
+
+				let style = document.getElementById("aComponent-style");
+				expect(style).to.exist;
+			});
+
+
+			it("won't attach the style for a component if it already attached.", () => {
+				component.oninit();
+
+				let style = document.querySelectorAll("#aComponent-style");
+				expect(style.length).to.equal(1);
+			});
+
+			it("complains if component has style but not name.", () => {
+				component.getStyle = function () {
+					return {};
+				}
+				component.name = undefined;
+
+				expect(component.oninit.bind(component)).to.throw(Error);
+			});
+		});
     });
 });

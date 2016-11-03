@@ -1,3 +1,1 @@
-var component= require("./lib/index.js").default;
-
-module.exports = component;
+module.exports = require("./lib/index.js").factory;

@@ -75,7 +75,8 @@ describe("base", () => {
 			};
 
 			let expected =
-`div {
+`
+div {
   xxx: xxx;
   yyy: yyy;
 }
@@ -253,30 +254,52 @@ div#id {
 	describe("getAttrs", () => {
 		let component;
 		beforeEach(() => {
-			component = {
+			component = factory({
 				getDefaultAttrs () {
 					return {cha: 1};
 				},
 				getClassList () {
 					return [];
-				}
-			};
+				},
+				view () {}
+			});
 		});
 
 		it("merges user supplied attributes with default attributes.", () => {
-			expect(base.getAttrs({nye: 2}, component)).to.eql({cha: 1, nye: 2, rootAttrs: {}});
+			let got = component.getAttrs({nye: 2});
+			let expected = {cha: 1, nye: 2, rootAttrs: {}};
+			expect(got).to.eql(expected);
 		});
 
 		it("attaches class to root element attributes", () => {
-			let got = base.getAttrs({class: "aclass"}, component);
-			let expected = {class: "aclass", cha: 1, rootAttrs: {className: "aclass"}};
+			let got = component.getAttrs({class: "aclass"});
+			let expected = {class: "aclass", cha: 1, rootAttrs: {class: "aclass"}};
 			expect(got).to.eql(expected);
 		});
 
 		it("attaches 'id' to root element attributes", () => {
-			let got = base.getAttrs({id: "aId"}, component);
+			let got = component.getAttrs({id: "aId"});
 			let expected = {id: "aId", cha: 1, rootAttrs: {id: "aId"}};
 			expect(got).to.eql(expected);
+		});
+
+		it("attaches component name to root element attributes.", () => {
+			let component = factory({
+				name: "greenBottle",
+				view: function () {}});
+
+			let got = component.getAttrs({});
+			expect(got.rootAttrs).to.eql({"data-component": "greenBottle"});
+		});
+
+		it("overrides component's name with attrs[data-component].", () => {
+			let aComponent = factory({
+				name: "aComponent",
+				view () {}
+			});
+
+			let got = aComponent.getAttrs({"data-component": "bComponent"});
+			expect(got.rootAttrs["data-component"]).to.equal("bComponent");
 		});
 	});
 
@@ -302,42 +325,43 @@ div#id {
 	  let component;
 
 	  beforeEach(() => {
-		component = {
+		component = factory({
 		  getDefaultAttrs () {
 			  return {nye: 2};
 		  },
 		  getClassList () {
 			return [];
-		  }
-		};
+		  },
+		  view () {}
+		});
 	  });
 
 		it("attaches given attribute merged with default attributes to vnode.attrs", () => {
 			let attrs = {cha: 1};
 			let children = ["child"];
-			let got = base.getVnode(attrs, children, component);
+			let got = component.getVnode(attrs, children);
 			expect(got.attrs).to.eql({cha: 1, nye: 2, rootAttrs: {}});
 		});
 
 		it("attaches default attribute to vnode.attrs if no attribute was passed", () => {
 			let children = ["child"];
-			let got = base.getVnode([], children, component);
+			let got = component.getVnode([], children);
 			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
 		});
 
 		it("attaches given children to vnode.children", () => {
 			let children = ["child"];
-			let got = base.getVnode({}, children, component);
+			let got = component.getVnode({}, children);
 			expect(got.children).to.eql(children);
 		});
 
 		it("identifies the child node even if attribute is absent", () => {
-			let got = base.getVnode(1, [2], component);
+			let got = component.getVnode(1, [2]);
 			expect(got.children).to.eql([1,2]);
 		});
 
 		it("returns object with attributes, children and state", () => {
-			let got = base.getVnode({}, [], component);
+			let got = component.getVnode({}, []);
 			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
 			expect(got.children).to.eql([]);
 			expect(got.state).to.eql(component);
@@ -371,10 +395,36 @@ div#id {
 			expect(base.isRootAttr(null, "keydata-1")).to.equal(false);
 		});
 	});
+
+	describe("is", () => {
+		it("returns true if component is of given type.", () => {
+			let fruit = factory({
+				name: "fruit",
+				view () {}
+			});
+
+			let apple = factory({
+				name: "apple",
+				base: fruit,
+			});
+
+			expect(apple.is("apple")).to.equal(true);
+			expect(apple.is("fruit")).to.equal(true);
+			expect(apple.is("banana")).to.equal(false);
+		});
+	});
 });
 
 describe("factory", () => {
 	let vdom;
+
+	beforeEach(() => {
+		global.document = new mocks.MockBrowser().getDocument();
+	});
+
+	afterEach(() => {
+		delete global.document;
+	});
 
     it("validates component", () => {
         expect(factory.bind(factory, {})).to.throw(Error);
@@ -431,7 +481,10 @@ describe("factory", () => {
             base: aComponent
         };
         let bComponent = factory(bStruct);
-        expect(bComponent.view()).to.equal(aStruct.view());
+
+		let got = bComponent.view(new bComponent.controller());
+		let expected = aStruct.view();
+        expect(got).to.equal(expected);
     });
 
 	it("supports mixins", () => {
@@ -463,25 +516,27 @@ describe("factory", () => {
 
             it("calls original view with vnode", () => {
 				var aComponent = factory(struct);
-				aComponent.view("ctrl", {}, "child1", "child2");
+				aComponent.view(new aComponent.controller(), {}, "child1", "child2");
 
 				expect(check).to.exist;
             });
 
             it("passes vnode to original view", () => {
                 let aComponent = factory(struct);
-				aComponent.view("ctrl", {attr1: 1}, "child1", "child2");
+				aComponent.view(new aComponent.controller(), {attr1: 1}, "child1", "child2");
 
 				expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
                 expect(check.children).to.eql(["child1", "child2"]);
-                expect(check.state).to.equal(aComponent);
+                expect(check.state).to.not.equal(aComponent);
+                expect(check.state.one).to.equal(1);
             });
 
             it("binds component to original view's 'this'", () => {
                 let aComponent = factory(struct);
-                aComponent.view("ctrl", {}, "child1", "child2");
+				let ctrl = new aComponent.controller();
+                aComponent.view(ctrl, {}, "child1", "child2");
 
-                expect(checkThis).to.equal(aComponent);
+                expect(checkThis).to.equal(ctrl);
             });
 
             it("throws error if attributes validation fails", () => {
@@ -491,7 +546,7 @@ describe("factory", () => {
 
                 let aComponent = factory(struct);
                 expect(aComponent.view.bind(aComponent,
-                                            "ctrl",
+											new aComponent.controller(),
                                             {one: 2}, "child1", "child2")).to.throw(Error);
             });
 
@@ -502,7 +557,7 @@ describe("factory", () => {
 
                 let aComponent = factory(struct);
                 expect(aComponent.view.bind(aComponent,
-                                            "ctrl",
+											new aComponent.controller(),
                                             {cha: 1}, "child1", "child2")).not.to.throw(Error);
             });
 
@@ -512,28 +567,28 @@ describe("factory", () => {
                 };
 
                 let aComponent = factory(struct);
-                aComponent.view("ctrl", {attr2: 2});
+                aComponent.view(new aComponent.controller(), {attr2: 2});
                 expect(check.attrs).to.eql({attr1: 1, attr2: 2, rootAttrs: {}});
             });
 
-            it("'s vnode.attr.rootAttrs.className is constructed out of class list", () => {
+            it("'s vnode.attr.rootAttrs.class is constructed out of class list", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "bclass"];
                 };
 
                 let aComponent = factory(struct);
-                aComponent.view("ctrl", {attr2: 2});
-                expect(check.attrs.rootAttrs.className).to.equal("aclass bclass");
+                aComponent.view(new aComponent.controller(), {attr2: 2});
+                expect(check.attrs.rootAttrs.class).to.equal("aclass bclass");
             });
 
-            it("'s vnode.attr.rootAttrs.className includes user supplied class", () => {
+            it("'s vnode.attr.rootAttrs.class includes user supplied class", () => {
                 struct.getClassList = function (attrs) {
                     return ["aclass", "cclass"];
                 };
 
                 let aComponent = factory(struct);
-                aComponent.view("ctrl", {class: "bclass"});
-                expect(check.attrs.rootAttrs.className).to.equal("aclass bclass cclass");
+                aComponent.view(new aComponent.controller(), {class: "bclass"});
+                expect(check.attrs.rootAttrs.class).to.equal("aclass bclass cclass");
             });
 
         });
@@ -567,13 +622,13 @@ describe("factory", () => {
 
                 expect(check.attrs).to.eql({attr1: 1, rootAttrs: {}});
                 expect(check.children).to.eql(["child1", "child2"]);
-                expect(check.state).to.equal(aComponent);
+				expect(check.state).to.exist;
             });
 
             it("binds oninit to component", () => {
                 let aComponent = factory(struct);
                 let returnObj = new aComponent.controller("attr", "child1", "child2");
-                expect(checkThis).to.equal(aComponent);
+                expect(checkThis).to.equal(returnObj);
             });
 
             it("returns object with onunload if onremove exists", () => {
@@ -594,19 +649,42 @@ describe("factory", () => {
                 let returnObj = new aComponent.controller();
                 expect(returnObj.onunload).not.to.exist;
             });
+        });
+
+		describe(".oninit", () => {
+			let struct, component;
+
+			beforeEach(() => {
+				struct = {
+					name: "aComponent",
+					getStyle (vnode) {
+						return {
+							"div": {
+								"background-color": "#fff"
+							}
+						};
+					},
+					view () {}
+				};
+
+				component = factory(struct);
+			});
+
 
 			it("attaches style to head if component's getStyle returns non null value.", () => {
+				component.oninit();
 
-		
+				let style = document.getElementById("aComponent-style");
+				expect(style).to.exist;
 			});
 
 
 			it("won't attach the style for a component if it already attached.", () => {
-				base.attachStyle("hello there", "aComponent");
-				let style = document.querySelectorAll("#aComponent-style");
+				component.oninit();
 
+				let style = document.querySelectorAll("#aComponent-style");
 				expect(style.length).to.equal(1);
 			});
-        });
+		});
     });
 });
