@@ -71,6 +71,7 @@ export const base = {
 	localizeStyle (componentName, style) {
 		return style
 			.replace(/^([a-zA-Z0-9]+)/gm, `$1[data-component=${componentName}]`)
+			.replace(/,\s*([a-zA-Z0-9]+)/gm, `, $1[data-component=${componentName}]`)
 			.replace(/^([.#:])/gm, `[data-component=${componentName}]$1`)
 			.replace(/^(\s\s)([a-zA-Z0-9]+)(.*?{)/gm, `$1$2[data-component=${componentName}]$3`)
 			.replace(/^(\s\s)([.#:])/gm, `$1[data-component=${componentName}]$2`)

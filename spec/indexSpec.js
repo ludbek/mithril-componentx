@@ -123,6 +123,9 @@ div#id {
 					xxx: "xxx",
 					yyy: "yyy"
 				},
+				"div.class, p,h1": {
+					xxx: "xxx"
+				},
 				"div.class": {
 					xxx: "xxx"
 				},
@@ -160,6 +163,9 @@ div#id {
 				"div[data-component=aComponent]": {
 					xxx: "xxx",
 					yyy: "yyy"
+				},
+				"div[data-component=aComponent].class, p[data-component=aComponent], h1[data-component=aComponent]": {
+					xxx: "xxx"
 				},
 				"div[data-component=aComponent].class": {
 					xxx: "xxx"
