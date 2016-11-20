@@ -52,7 +52,9 @@ export const base = {
 						css += leftPad + "}\n";
 					}
 					else {
-						css += leftPad + key + ": " + js[key] + ";\n";
+						// convert camelcase to snake case
+						let normalizedKey = key.replace(/([A-Z])/g, `-$1`).toLowerCase();
+						css += leftPad + normalizedKey + ": " + js[key] + ";\n";
 					}
 				}
 			}

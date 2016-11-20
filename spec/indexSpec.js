@@ -42,7 +42,7 @@ describe("base", () => {
 			let jsStyle = {
 				div: {
 					xxx: "xxx",
-					yyy: "yyy"
+					yYY: "yyy"
 				},
 				"div.class": {
 					xxx: "xxx"
@@ -78,7 +78,7 @@ describe("base", () => {
 `
 div {
   xxx: xxx;
-  yyy: yyy;
+  y-y-y: yyy;
 }
 div.class {
   xxx: xxx;
