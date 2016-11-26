@@ -20,6 +20,9 @@ A component factory for [Mithril](https://github.com/lhorie/mithril.js).
 ## Bower
 `bower install mithril-componentx`
 
+# Compatibility
+`mithril-componentx` works with all the modern browsers. For old ones please use shim like [this](https://github.com/es-shims/es5-shim).
+
 # Quick overview
 ```javascript
 import component from "mithril-componentx";
