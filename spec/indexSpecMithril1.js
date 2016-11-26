@@ -1,10 +1,43 @@
-import {factory, base, validateComponent, isMithril1} from "../src/index.js";
+import {factory, base, validateComponent, isMithril1, merge} from "../src/index.js";
 import chai from "chai";
 import {mocks} from "mock-browser";
 
 let expect = chai.expect;
 
 let noop = function () {};
+
+describe("merge", () => {
+	it("merges source with destination", () => {
+		let destination = {
+			a: 1,
+			b: {
+				c: 1,
+				d: 1
+			}
+		};
+		let source = {
+			a: 0,
+			b: {
+				e: 0
+			},
+			f: 0
+		};
+
+		let expected = {
+			a: 0,
+			b: {
+				c: 1,
+				d: 1,
+				e: 0
+			},
+			f: 0
+		};
+
+		expect(merge(destination, source)).to.eql(expected);
+	});
+});
+
+
 
 
 describe("validateComponent", () => {
@@ -370,28 +403,28 @@ div#id {
 
 	describe("isRootAttrs", () => {
 		it("returns true for 'id'.", () => {
-			expect(base.isRootAttr(null, "id")).to.equal(true);
+			expect(base.isRootAttr("id")).to.equal(true);
 		});
 
 		it("returns true for 'style'.", () => {
-			expect(base.isRootAttr(null, "style")).to.equal(true);
+			expect(base.isRootAttr("style")).to.equal(true);
 		});
 
 		it("returns true for 'on*'.", () => {
-			expect(base.isRootAttr(null, "onclick")).to.equal(true);
+			expect(base.isRootAttr("onclick")).to.equal(true);
 		});
 
 		it("returns true for 'data-*'.", () => {
-			expect(base.isRootAttr(null, "data-key")).to.equal(true);
+			expect(base.isRootAttr("data-key")).to.equal(true);
 		});
 
 		it("returns true for 'config'.", () => {
-			expect(base.isRootAttr(null, "data-key")).to.equal(true);
+			expect(base.isRootAttr("data-key")).to.equal(true);
 		});
 
 		it("returns false for rest.", () => {
-			expect(base.isRootAttr(null, "xon")).to.equal(false);
-			expect(base.isRootAttr(null, "keydata-1")).to.equal(false);
+			expect(base.isRootAttr("xon")).to.equal(false);
+			expect(base.isRootAttr("keydata-1")).to.equal(false);
 		});
 	});
 

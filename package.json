@@ -1,6 +1,6 @@
 {
   "name": "mithril-componentx",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "Component factory for Mithriljs.",
   "main": "index.js",
   "scripts": {
@@ -46,7 +46,6 @@
     "webpack": "^1.12.14"
   },
   "dependencies": {
-    "classnames": "^2.2.5",
-    "lodash": "^4.16.2"
+    "classnames": "^2.2.5"
   }
 }

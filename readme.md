@@ -319,7 +319,7 @@ Override `isRootAttr` method to change the default behaviour.
 
 ```javascript
 let button = component({
-	isRootAttr (value, key) {
+	isRootAttr (key) {
 		return /^(onclick|style)$/.test(key)? true: false;
 	},
 	view (vnode) {

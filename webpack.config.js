@@ -11,6 +11,8 @@ module.exports = {
     libraryTarget: 'var'
   },
   externals: {
+	  mithril: "m",
+	  // classnames: "classnames"
   },
   module: {
     loaders: [

@@ -1,14 +1,37 @@
-import assign from "lodash/assign";
-import cloneDeep from "lodash/cloneDeep";
-import isObject from "lodash/isObject";
-import isFunction from "lodash/isFunction";
 import classNames from "classnames";
-import isArray from "lodash/isArray";
-import merge from "lodash/merge";
-import pickBy from "lodash/pickBy";
-import reduce from "lodash/reduce";
 
+export const merge = (destination, source) => {
+	Object.keys(source).forEach((key) => {
+		if (isObject(source[key])) {
+			destination[key] = merge(isObject(destination[key]) && destination[key] || {}, source[key]);
+		}
+		else {
+			destination[key] = source[key];
+		}
+	});
 
+	return destination;
+};
+
+const assign = Object.assign;
+
+const isObject = (data) => {
+	return data != null && typeof data === 'object' && isArray(data) === false;
+};
+
+const isArray = Array.isArray;
+
+const pickBy = (obj, checker) => {
+	return Object.keys(obj).reduce((desiredObj, key) => {
+		let value = obj[key];
+
+		if (checker(key)) {
+			desiredObj[key] = value;
+		}
+
+		return desiredObj;
+	}, {});
+};
 
 export const validateComponent = (comp) => {
 	if (!comp.view) throw Error("View is required.");
@@ -107,7 +130,7 @@ export const base = {
 	/*
 	 * Returns true for attirbutes which are selected for root dom of the component.
 	 * */
-	isRootAttr (value, key) {
+	isRootAttr (key) {
 		// TODO: if mithril 1.x.x component lifecycle return false
 		try {
 			return /^(key|id|style|on.*|data-.*|config)$/.test(key)? true: false;
@@ -151,14 +174,14 @@ export const base = {
 
 		if (!isMithril1()) {
 			if(this.isAttr(attrs)) {
-				newAttrs = merge(cloneDeep(defaultAttrs), attrs);
+				newAttrs = [defaultAttrs, attrs].reduce(merge, {});
 			}
 			else {
 				newAttrs = defaultAttrs;
 			}
 		}
 		else {
-			newAttrs = merge(cloneDeep(defaultAttrs), attrs);
+			newAttrs = [defaultAttrs, attrs].reduce(merge, {});
 		}
 
 		newAttrs.rootAttrs = newAttrs.rootAttrs || {};
@@ -215,7 +238,7 @@ export const factory = (struct) => {
 	let mixins = struct.mixins || [];
 	let sources = [base, struct.base || {}].concat(mixins);
 	sources.push(struct);
-    let component = reduce(sources, assign, {});
+    let component = sources.reduce(assign, {});
 
     validateComponent(component);
 
@@ -244,7 +267,7 @@ export const factory = (struct) => {
 	// for mithril 0.2.x
 	if (!isMithril1()) {
 		component.controller = function (attrs, ...children) {
-			let ctrl = cloneDeep(component);
+			let ctrl = merge({}, component);
 
 			if (component.onremove) {
 				ctrl.onunload = component.onremove.bind(ctrl);
