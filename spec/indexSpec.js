@@ -177,7 +177,7 @@ div#id {
 					yyy: "yyy"
 				},
 				"div.class, p,h1": {
-					xxx: "xxx"
+					xxx: "xxx rgb(1, 2, 3)"
 				},
 				"div.class": {
 					xxx: "xxx"
@@ -218,7 +218,7 @@ div#id {
 					yyy: "yyy"
 				},
 				"div[data-component=aComponent].class, p[data-component=aComponent], h1[data-component=aComponent]": {
-					xxx: "xxx"
+					xxx: "xxx rgb(1, 2, 3)"
 				},
 				"div[data-component=aComponent].class": {
 					xxx: "xxx"
