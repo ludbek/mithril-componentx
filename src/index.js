@@ -60,15 +60,15 @@ export const base = {
 	/*
 	 * Generates stylesheet based upon data returned by getStyle()
 	 * */
-	genStyle (jsStyle) {
-		function genSingleLevel (js, indent = 1) {
+	genStyle (jsStyle, componentName) {
+		let genSingleLevel = (js, indent = 1) => {
 			let leftPad = new Array(indent).join(" ");
 			let css = "";
 
 			for (let key in js) {
 				if (js.hasOwnProperty(key)) {
 					if (typeof js[key] === "object") {
-						css += leftPad + key + " {\n";
+						css += leftPad + this.localizeSelector(key, componentName) + " {\n";
 
 						css += genSingleLevel(js[key], indent + 2);
 
@@ -90,20 +90,21 @@ export const base = {
 	},
 
 	/*
-	 * Attaches component name to the style.
+	 * Attaches component name to the key.
 	 * This increases specificity.
 	 * */
-	localizeStyle (componentName, style) {
-		return style
-			.replace(/^([a-zA-Z0-9]+)/gm, `$1[data-component=${componentName}]`)
-			.replace(/,\s*([a-zA-Z0-9]+)/gm, `, $1[data-component=${componentName}]`)
-			.replace(/^([.#:])/gm, `[data-component=${componentName}]$1`)
-			.replace(/^(\s\s)([a-zA-Z0-9]+)(.*?{)/gm, `$1$2[data-component=${componentName}]$3`)
-			.replace(/^(\s\s)([.#:])/gm, `$1[data-component=${componentName}]$2`)
-			// reverse for keyframe styles
-			.replace(/^(\s\s[0-9]+).*?{/gm, `$1% {`)
-			.replace(/^(\s\sfrom).*?{/gm, `$1 {`)
-			.replace(/^(\s\sto).*?{/gm, `$1 {`);
+	localizeSelector (key, componentName) {
+        if (key.indexOf(",") !== -1) {
+            return key.split(",").map((frag) => {
+                return this.localizeSelector(frag.trim(), componentName);
+            }).join(", ");
+        }
+
+		return key
+			.replace(/^([^@,%]*?)$/, `$1[data-component=${componentName}]`)
+			// reverse for keyframe keys
+			.replace(/^(from\[.*?)$/, `from`)
+			.replace(/^(to\[.*?)$/, `to`);
 	},
 
 	/*
@@ -257,9 +258,7 @@ export const factory = (struct) => {
 
 		if (!style || style && document.getElementById(cName + "-style")) return;
 
-		component.attachStyle(
-				component.localizeStyle(cName, component.genStyle(style)),
-				cName);
+		component.attachStyle(component.genStyle(style, cName), cName);
 	};
 
     let originalView = component.view.originalView || component.view;
