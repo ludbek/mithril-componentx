@@ -95,7 +95,7 @@ describe("base", () => {
 		});
 	});
 
-	describe.only("genStyle", () => {
+	describe("genStyle", () => {
 		let inputStyle, expectedStyle;
 
 		beforeEach(() => {

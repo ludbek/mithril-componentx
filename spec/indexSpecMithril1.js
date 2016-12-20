@@ -70,83 +70,6 @@ describe("validateComponent", () => {
 
 describe("base", () => {
 	describe("genStyle", () => {
-		it("converts json to css", () => {
-			let jsStyle = {
-				div: {
-					xxx: "xxx",
-					yyy: "yyy"
-				},
-				"div.class": {
-					xxx: "xxx"
-				},
-				"div#id": {
-					xxx: "xxx"
-				},
-				".class": {
-					xxx: "xxx"
-				},
-				"#id": {
-					xxx: "xxx"
-				},
-				"@media xxx": {
-					div: {
-						xxx: "xxx"
-					}
-				},
-				"@keyframe xxx": {
-					"0%": {
-						xxx: "xxx"
-					},
-					from: {
-						xxx: "xxx"
-					},
-					to: {
-						xxx: "xxx"
-					}
-				}
-			};
-
-			let expected =
-`
-div {
-  xxx: xxx;
-  yyy: yyy;
-}
-div.class {
-  xxx: xxx;
-}
-div#id {
-  xxx: xxx;
-}
-.class {
-  xxx: xxx;
-}
-#id {
-  xxx: xxx;
-}
-@media xxx {
-  div {
-    xxx: xxx;
-  }
-}
-@keyframe xxx {
-  0% {
-    xxx: xxx;
-  }
-  from {
-    xxx: xxx;
-  }
-  to {
-    xxx: xxx;
-  }
-}
-`;
-
-			expect(base.genStyle(jsStyle)).to.equal(expected);
-		});
-	});
-
-	describe("localizeStyle", () => {
 		let inputStyle, expectedStyle;
 
 		beforeEach(() => {
@@ -154,6 +77,9 @@ div#id {
 				div: {
 					xxx: "xxx",
 					yyy: "yyy"
+				},
+				"div.class, p,#aId": {
+					xxx: "xxx rgb(1, 2, 3)"
 				},
 				"div.class": {
 					xxx: "xxx"
@@ -188,50 +114,57 @@ div#id {
 				}
 			};
 
-			expectedStyle = {
-				"div[data-component=aComponent]": {
-					xxx: "xxx",
-					yyy: "yyy"
-				},
-				"div[data-component=aComponent].class": {
-					xxx: "xxx"
-				},
-				"div[data-component=aComponent]#id": {
-					xxx: "xxx"
-				},
-				"[data-component=aComponent].class": {
-					xxx: "xxx"
-				},
-				"[data-component=aComponent]#id": {
-					xxx: "xxx"
-				},
-				"@media xxx": {
-					"div[data-component=aComponent]": {
-						xxx: "xxx"
-					},
-					"[data-component=aComponent].class": {
-						xxx: "xxx"
-					}
-				},
-				"@keyframe xxx": {
-					"0%": {
-						xxx: "xxx"
-					},
-					from: {
-						xxx: "xxx"
-					},
-					to: {
-						xxx: "xxx"
-					}
-				}
-			};
+			expectedStyle = `
+div[data-component=aComponent] {
+  xxx: xxx;
+  yyy: yyy;
+}
+div.class[data-component=aComponent], p[data-component=aComponent], #aId[data-component=aComponent] {
+  xxx: xxx rgb(1, 2, 3);
+}
+div.class[data-component=aComponent] {
+  xxx: xxx;
+}
+div#id[data-component=aComponent] {
+  xxx: xxx;
+}
+.class[data-component=aComponent] {
+  xxx: xxx;
+}
+#id[data-component=aComponent] {
+  xxx: xxx;
+}
+@media xxx {
+  div[data-component=aComponent] {
+    xxx: xxx;
+  }
+  .class[data-component=aComponent] {
+    xxx: xxx;
+  }
+}
+@keyframe xxx {
+  0% {
+    xxx: xxx;
+  }
+  from {
+    xxx: xxx;
+  }
+  to {
+    xxx: xxx;
+  }
+}
+`;
+
 		});
 
 		it("adds component to style to increase specificity", () => {
-			let got = base.localizeStyle("aComponent", base.genStyle(inputStyle));
-			expect(got).to.eql(base.genStyle(expectedStyle));
+			let got = base.genStyle(inputStyle, "aComponent");
+			expect(got).to.eql(expectedStyle);
 		});
 
+	});
+
+	describe("localizeStyle", () => {
 	});
 
 	describe("attachStyle", () => {
