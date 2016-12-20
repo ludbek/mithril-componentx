@@ -78,6 +78,10 @@ describe("base", () => {
 					xxx: "xxx",
 					yyy: "yyy"
 				},
+				"div .class": {
+					xxx: "xxx",
+					yyy: "yyy"
+				},
 				"div.class, p,#aId": {
 					xxx: "xxx rgb(1, 2, 3)"
 				},
@@ -116,6 +120,10 @@ describe("base", () => {
 
 			expectedStyle = `
 div[data-component=aComponent] {
+  xxx: xxx;
+  yyy: yyy;
+}
+div[data-component=aComponent] .class {
   xxx: xxx;
   yyy: yyy;
 }
