@@ -86,7 +86,8 @@ export class Component {
         }
 
 		return key
-			.replace(/^([^@,%]*?)$/, `$1[data-component=${componentName}]`)
+			.replace(/^([^@,%\s]*?)$/, `$1[data-component=${componentName}]`)
+			.replace(/^([^@]*?)\s+(.*?)$/, `$1[data-component=${componentName}] $2`)
 			// reverse for keyframe keys
 			.replace(/^(from\[.*?)$/, `from`)
 			.replace(/^(to\[.*?)$/, `to`);
