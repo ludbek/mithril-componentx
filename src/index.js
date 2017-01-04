@@ -1,17 +1,4 @@
-import classNames from "classnames";
-
-export const merge = (destination, source) => {
-	Object.keys(source).forEach((key) => {
-		if (isObject(source[key])) {
-			destination[key] = merge(isObject(destination[key]) && destination[key] || {}, source[key]);
-		}
-		else {
-			destination[key] = source[key];
-		}
-	});
-
-	return destination;
-};
+const LIFECYCLE_METHODS = ["oninit", "oncreate", "onbeforeupdate", "onupdate", "onbeforeremove", "onremove"];
 
 const assign = Object.assign;
 
@@ -33,30 +20,24 @@ const pickBy = (obj, checker) => {
 	}, {});
 };
 
+export const merge = (destination, source) => {
+	Object.keys(source).forEach((key) => {
+		if (isObject(source[key])) {
+			destination[key] = merge(isObject(destination[key]) && destination[key] || {}, source[key]);
+		}
+		else {
+			destination[key] = source[key];
+		}
+	});
+
+	return destination;
+};
+
 export const validateComponent = (comp) => {
 	if (!comp.view) throw Error("View is required.");
 };
 
-
-export const isMithril1 = () => {
-	// for browser
-	try {
-		if (/^1\.\d\.\d$/.test(m.version)) return true;
-		return false;
-	}
-	// node
-	catch (err){
-		try {
-			require("mithril");
-			return false;
-		}
-		catch (err)  {
-			return true;
-		}
-	}
-};
-
-export const base = {
+export const class Component {
 	/*
 	 * Generates stylesheet based upon data returned by getStyle()
 	 * */
@@ -87,7 +68,7 @@ export const base = {
 
 
 		return "\n" + genSingleLevel(jsStyle);
-	},
+	}
 
 	/*
 	 * Attaches component name to the key.
@@ -105,12 +86,12 @@ export const base = {
 			// reverse for keyframe keys
 			.replace(/^(from\[.*?)$/, `from`)
 			.replace(/^(to\[.*?)$/, `to`);
-	},
+	}
 
 	/*
 	 * Returns json which will be used by genStyles() to generate stylesheet for this component.
 	 * */
-    getStyle (vnode) {},
+    getStyle (vnode) {}
 
 	/*
 	 * Attach styles to the head
@@ -126,7 +107,7 @@ export const base = {
 		}
 
 		document.getElementsByTagName('head')[0].appendChild(node);
-	},
+	}
 
 	/*
 	 * Returns true for attirbutes which are selected for root dom of the component.
@@ -141,16 +122,8 @@ export const base = {
 				return false;
 			}
 		}
-	},
+	}
 
-	/*
-	 * Returns true if the first argument to the component is an attribute.
-	 * */
-	isAttr (attrs) {
-	  return !isArray(attrs) && isObject(attrs) && !(attrs.view || attrs.tag) && !attrs.length
-		? true
-		: false;
-	},
 	insertUserClass (classList, userClass) {
 	  if (classList.length == 0) {
 		return [userClass];
@@ -163,35 +136,21 @@ export const base = {
 		classList.splice(1,0, userClass);
 		return classList;
 	  }
-	},
+	}
+
 	getClass (classList, userClass) {
-		// attach component name to the classlist
 		return classNames(this.insertUserClass(classList, userClass));
-	},
+	}
 
-	getAttrs (attrs = {}) {
-		let defaultAttrs = this.getDefaultAttrs(attrs);
-		let newAttrs = {};
+	getAttrs (vnode) {
+		let defaultAttrs = this.getDefaultAttrs(vnode);
+		let newAttrs = [defaultAttrs, vnode.attrs].reduce(merge, {});
 
-		if (!isMithril1()) {
-			if(this.isAttr(attrs)) {
-				newAttrs = [defaultAttrs, attrs].reduce(merge, {});
-			}
-			else {
-				newAttrs = defaultAttrs;
-			}
-		}
-		else {
-			newAttrs = [defaultAttrs, attrs].reduce(merge, {});
-		}
-
-		newAttrs.rootAttrs = newAttrs.rootAttrs || {};
-
-		if (this.name) {
-			newAttrs.rootAttrs["data-component"] = this.name;
-		}
-
-		newAttrs.rootAttrs = merge(newAttrs.rootAttrs, pickBy(newAttrs, this.isRootAttr));
+		newAttrs.rootAttrs = [
+			newAttrs.rootAttrs || {},
+			{"data-component" = this.name},
+			pickBy(newAttrs, this.isRootAttr)
+		].reduce(merge, {})
 
 		let newClassName = this.getClass(this.getClassList(newAttrs), newAttrs.class);
 		if (newClassName) {
@@ -199,46 +158,38 @@ export const base = {
 		}
 
 		return newAttrs;
-	},
-
-	getVnode (attrs, children) {
-	  let newAttrs = this.getAttrs(attrs);
-
-	  if (this.isAttr(attrs)) {
-		return {attrs: newAttrs, children, state : this};
-	  }
-
-	  children.unshift(attrs);
-
-	  return {attrs: newAttrs, children, state: this};
-	},
+	}
 
     getDefaultAttrs () {
         return {};
-    },
+    }
 
     getClassList (attrs) {
         return [];
-    },
+    }
 
-    validateAttrs (attrs) {},
+    validateAttrs (attrs) {}
 
-	is(type) {
-		if (this.name === type) {
-			return true;
-		}
-		else if (this.base) {
-			return this.base.is(type);
-		}
+	oninit (vnode) {
+		vnode.attrs = this.getAttrs(vnode.attrs);
+		this.validateAttrs(vnode.attrs);
 
-		return false;
+		let style = this.getStyle(vnode);
+		let cName = this.name;
+
+		if (!style || style && document.getElementById(cName + "-style")) return;
+
+		this.attachStyle(this.genStyle(style, cName), cName);
+	}
+
+	onbeforeupdate (vnode) {
+		vnode.attrs = this.getAttrs(vnode.attrs);
+		this.validateAttrs(vnode.attrs);
 	}
 };
 
 export const factory = (struct) => {
-	let mixins = struct.mixins || [];
-	let sources = [base, struct.base || {}].concat(mixins);
-	sources.push(struct);
+	let sources = [base, struct.base || {}, struct.mixins || [], struct];
     let component = sources.reduce(assign, {});
 
     validateComponent(component);
@@ -263,37 +214,12 @@ export const factory = (struct) => {
 
     let originalView = component.view.originalView || component.view;
 
-	// for mithril 0.2.x
-	if (!isMithril1()) {
-		component.controller = function (attrs, ...children) {
-			let ctrl = merge({}, component);
+	component.view = function (vnode) {
+		vnode.attrs = this.getAttrs(vnode.attrs);
+		this.validateAttrs(vnode.attrs);
 
-			if (component.onremove) {
-				ctrl.onunload = component.onremove.bind(ctrl);
-			}
-
-			ctrl.oninit && ctrl.oninit(ctrl.getVnode(attrs, children));
-
-			return ctrl;
-		};
-
-		component.view = function (ctrl, attrs, ...children) {
-			let vnode = ctrl.getVnode(attrs, children);
-
-			ctrl.validateAttrs(vnode.attrs);
-
-			return originalView.call(ctrl, vnode);
-		};
-	}
-	// for mithril 1.x.x
-	else {
-		component.view = function (vnode) {
-			vnode.attrs = this.getAttrs(vnode.attrs);
-			this.validateAttrs(vnode.attrs);
-
-			return originalView.call(this, vnode);
-		};
-	}
+		return originalView.call(this, vnode);
+	};
 
 	component.view.originalView = originalView;
 
