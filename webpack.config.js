@@ -10,10 +10,7 @@ module.exports = {
     library: 'component',
     libraryTarget: 'var'
   },
-  externals: {
-	  mithril: "m",
-	  // classnames: "classnames"
-  },
+  externals: {},
   module: {
     loaders: [
       {test: /\.js/, loader: "babel", include: __dirname + "/src"}
