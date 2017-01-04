@@ -145,7 +145,11 @@ export class Component {
 	}
 
 	getClass (classList, userClass) {
-		return classNames(this.insertUserClass(classList, userClass));
+		return this.insertUserClass(classList, userClass)
+			.filter((aClass) => {
+				return [null, undefined, ""].indexOf(aClass) === -1;
+			})
+			.join(" ");
 	}
 
 	getAttrs (vnode) {
@@ -154,7 +158,7 @@ export class Component {
 
 		newAttrs.rootAttrs = [
 			newAttrs.rootAttrs || {},
-			{"data-component": this.name},
+			{"data-component": this.constructor.name},
 			pickBy(newAttrs, this.isRootAttr)
 		].reduce(merge, {})
 
@@ -177,11 +181,11 @@ export class Component {
     validateAttrs (attrs) {}
 
 	oninit (vnode) {
-		vnode.attrs = this.getAttrs(vnode.attrs);
+		vnode.attrs = this.getAttrs(vnode);
 		this.validateAttrs(vnode.attrs);
 
 		let style = this.getStyle(vnode);
-		let cName = this.name;
+		let cName = this.constructor.name;
 
 		if (!style || style && document.getElementById(cName + "-style")) return;
 
@@ -189,7 +193,7 @@ export class Component {
 	}
 
 	onbeforeupdate (vnode) {
-		vnode.attrs = this.getAttrs(vnode.attrs);
+		vnode.attrs = this.getAttrs(vnode);
 		this.validateAttrs(vnode.attrs);
 	}
 };
