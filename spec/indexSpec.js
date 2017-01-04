@@ -1,4 +1,4 @@
-import {factory, base, validateComponent, isMithril1, merge} from "../src/index.js";
+import {Component, merge} from "../src/index.js";
 import chai from "chai";
 import {mocks} from "mock-browser";
 
@@ -61,39 +61,8 @@ describe("merge", () => {
 });
 
 
-describe("validateComponent", () => {
-	it("complains if component lacks view", () => {
-		expect(validateComponent.bind(base, {})).to.throw(Error);
-	});
-
-	it("won't complain if component has view", () => {
-		expect(validateComponent.bind(base, {view () {}})).not.to.throw(Error);
-	});
-});
-
-
-// describe("isMithril1", () => {
-// 	it("returns true for mithril version 1.x.x", () => {
-// 		let m = {
-// 			version: "1.0.0"
-// 		};
-// 		expect(isMithril1(m)).to.equal(true);
-// 	});
-//
-// 	it("returns false for mithril version 0.x.x", () => {
-// 		let m = {
-// 			version: "0.2.0"
-// 		};
-// 		expect(isMithril1(m)).to.equal(false);
-// 	});
-// });
-
-
-describe("base", () => {
-	describe("localizeSelector", () => {
-		it("converts json to css", () => {
-		});
-	});
+describe("Component", () => {
+	describe("localizeSelector", () => {});
 
 	describe("genStyle", () => {
 		let inputStyle, expectedStyle;
@@ -141,30 +110,30 @@ describe("base", () => {
 			};
 
 			expectedStyle = `
-div[data-component=aComponent] {
+div[data-component=Component] {
   xxx: xxx;
   yyy: yyy;
 }
-div.class[data-component=aComponent], p[data-component=aComponent], #aId[data-component=aComponent] {
+div.class[data-component=Component], p[data-component=Component], #aId[data-component=Component] {
   xxx: xxx rgb(1, 2, 3);
 }
-div.class[data-component=aComponent] {
+div.class[data-component=Component] {
   xxx: xxx;
 }
-div#id[data-component=aComponent] {
+div#id[data-component=Component] {
   xxx: xxx;
 }
-.class[data-component=aComponent] {
+.class[data-component=Component] {
   xxx: xxx;
 }
-#id[data-component=aComponent] {
+#id[data-component=Component] {
   xxx: xxx;
 }
 @media xxx {
-  div[data-component=aComponent] {
+  div[data-component=Component] {
     xxx: xxx;
   }
-  .class[data-component=aComponent] {
+  .class[data-component=Component] {
     xxx: xxx;
   }
 }
@@ -183,7 +152,8 @@ div#id[data-component=aComponent] {
 		});
 
 		it("adds component to style to increase specificity", () => {
-			let got = base.genStyle(inputStyle, "aComponent");
+			let aComponent = new Component();
+			let got = aComponent.genStyle(inputStyle);
 			expect(got).to.eql(expectedStyle);
 		});
 
@@ -195,8 +165,9 @@ div#id[data-component=aComponent] {
 		});
 
 		it("attaches given style to head", () => {
-			base.attachStyle("hello there", "aComponent");
-			let style = document.getElementById("aComponent-style");
+			let aComponent = new Component();
+			aComponent.attachStyle("hello there");
+			let style = document.getElementById("Component-style");
 
 			expect(style).to.exist;
 			expect(style.textContent).to.equal("hello there");
@@ -290,96 +261,50 @@ div#id[data-component=aComponent] {
 		});
 	});
 
-	describe("isAttr", () => {
-	  it("returns false if it has .tag attribute", () => {
-		expect(base.isAttr({tag: 'atag'})).to.equal(false);
-	  });
 
-	  it("returns false if it has .view attribute", () => {
-		expect(base.isAttr({view: noop})).to.equal(false);
-	  });
+	describe.only("isRootAttrs", () => {
+		let aComponent;
 
-	  it("returns false if it is an array", () => {
-		expect(base.isAttr([])).to.equal(false);
-	  });
-
-	  it("returns true if it is an object without .tag and .view attributes", () => {
-		expect(base.isAttr({})).to.equal(true);
-	  });
-	});
-
-	describe("getVnode", () => {
-	  let component;
-
-	  beforeEach(() => {
-		component = factory({
-		  getDefaultAttrs () {
-			  return {nye: 2};
-		  },
-		  getClassList () {
-			return [];
-		  },
-		  view () {}
-		});
-	  });
-
-		it("attaches given attribute merged with default attributes to vnode.attrs", () => {
-			let attrs = {cha: 1};
-			let children = ["child"];
-			let got = component.getVnode(attrs, children);
-			expect(got.attrs).to.eql({cha: 1, nye: 2, rootAttrs: {}});
+		beforeEach(() => {
+			aComponent = new Component();
 		});
 
-		it("attaches default attribute to vnode.attrs if no attribute was passed", () => {
-			let children = ["child"];
-			let got = component.getVnode([], children);
-			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
+		it("returns false for lifecyle methods", () => {
+			expect(aComponent.isRootAttr("oninit")).to.equal(false);
+			expect(aComponent.isRootAttr("oncreate")).to.equal(false);
+			expect(aComponent.isRootAttr("onbeforeupdate")).to.equal(false);
+			expect(aComponent.isRootAttr("onupdate")).to.equal(false);
+			expect(aComponent.isRootAttr("onbeforeremove")).to.equal(false);
+			expect(aComponent.isRootAttr("onremove")).to.equal(false);
 		});
 
-		it("attaches given children to vnode.children", () => {
-			let children = ["child"];
-			let got = component.getVnode({}, children);
-			expect(got.children).to.eql(children);
+		it("returns true for 'key'.", () => {
+			expect(aComponent.isRootAttr("key")).to.equal(true);
 		});
 
-		it("identifies the child node even if attribute is absent", () => {
-			let got = component.getVnode(1, [2]);
-			expect(got.children).to.eql([1,2]);
-		});
-
-		it("returns object with attributes, children and state", () => {
-			let got = component.getVnode({}, []);
-			expect(got.attrs).to.eql({nye: 2, rootAttrs: {}});
-			expect(got.children).to.eql([]);
-			expect(got.state).to.eql(component);
-		});
-	});
-
-
-	describe("isRootAttrs", () => {
 		it("returns true for 'id'.", () => {
-			expect(base.isRootAttr("id")).to.equal(true);
+			expect(aComponent.isRootAttr("id")).to.equal(true);
 		});
 
 		it("returns true for 'style'.", () => {
-			expect(base.isRootAttr("style")).to.equal(true);
+			expect(aComponent.isRootAttr("style")).to.equal(true);
 		});
 
 		it("returns true for 'on*'.", () => {
-			expect(base.isRootAttr("onclick")).to.equal(true);
+			expect(aComponent.isRootAttr("onclick")).to.equal(true);
 		});
 
 		it("returns true for 'data-*'.", () => {
-			expect(base.isRootAttr("data-key")).to.equal(true);
+			expect(aComponent.isRootAttr("data-key")).to.equal(true);
 		});
 
 		it("returns true for 'config'.", () => {
-			expect(base.isRootAttr("data-key")).to.equal(true);
+			expect(aComponent.isRootAttr("data-key")).to.equal(true);
 		});
 
 		it("returns false for rest.", () => {
-			expect(base.isRootAttr("xon")).to.equal(false);
-			expect(base.isRootAttr("keydata-1")).to.equal(false);
+			expect(aComponent.isRootAttr("xon")).to.equal(false);
+			expect(aComponent.isRootAttr("keydata-1")).to.equal(false);
 		});
 	});
 

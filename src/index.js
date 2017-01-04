@@ -1,4 +1,11 @@
-const LIFECYCLE_METHODS = ["oninit", "oncreate", "onbeforeupdate", "onupdate", "onbeforeremove", "onremove"];
+const LIFECYCLE_METHODS = [
+	"oninit",
+	"oncreate",
+	"onbeforeupdate",
+	"onupdate",
+	"onbeforeremove",
+	"onremove"
+];
 
 const assign = Object.assign;
 
@@ -33,15 +40,12 @@ export const merge = (destination, source) => {
 	return destination;
 };
 
-export const validateComponent = (comp) => {
-	if (!comp.view) throw Error("View is required.");
-};
-
-export const class Component {
+export class Component {
 	/*
 	 * Generates stylesheet based upon data returned by getStyle()
 	 * */
-	genStyle (jsStyle, componentName) {
+	genStyle (jsStyle) {
+		let componentName = this.constructor.name;
 		let genSingleLevel = (js, indent = 1) => {
 			let leftPad = new Array(indent).join(" ");
 			let css = "";
@@ -96,7 +100,8 @@ export const class Component {
 	/*
 	 * Attach styles to the head
 	 * */
-	attachStyle (style, componentName) {
+	attachStyle (style) {
+		let componentName = this.constructor.name;
 		let node = document.createElement("style");
 		node.id = componentName + "-style";
 
@@ -113,7 +118,8 @@ export const class Component {
 	 * Returns true for attirbutes which are selected for root dom of the component.
 	 * */
 	isRootAttr (key) {
-		// TODO: if mithril 1.x.x component lifecycle return false
+		if (LIFECYCLE_METHODS.indexOf(key) !== -1) return false;
+
 		try {
 			return /^(key|id|style|on.*|data-.*|config)$/.test(key)? true: false;
 		}
@@ -148,7 +154,7 @@ export const class Component {
 
 		newAttrs.rootAttrs = [
 			newAttrs.rootAttrs || {},
-			{"data-component" = this.name},
+			{"data-component": this.name},
 			pickBy(newAttrs, this.isRootAttr)
 		].reduce(merge, {})
 
