@@ -182,6 +182,7 @@ export class Component {
     validateAttrs (attrs) {}
 
 	oninit (vnode) {
+		vnode.attrs = vnode.attrs || {};
 		vnode.attrs = this.getAttrs(vnode);
 		this.validateAttrs(vnode.attrs);
 
@@ -194,6 +195,7 @@ export class Component {
 	}
 
 	onbeforeupdate (vnode) {
+		vnode.attrs = vnode.attrs || {};
 		vnode.attrs = this.getAttrs(vnode);
 		this.validateAttrs(vnode.attrs);
 	}
