@@ -163,7 +163,9 @@ export class Component {
 			pickBy(newAttrs, this.isRootAttr)
 		].reduce(merge, {})
 
-		let newClassName = this.getClass(this.getClassList(newAttrs), newAttrs.class);
+		let newClassName = this.getClass(
+				this.getClassList({attrs: newAttrs, children: vnode.children, state: vnode.state}),
+				newAttrs.class);
 		if (newClassName) {
 			newAttrs.rootAttrs.class = newClassName;
 		}
@@ -171,11 +173,11 @@ export class Component {
 		return newAttrs;
 	}
 
-    getDefaultAttrs () {
+    getDefaultAttrs (vnode) {
         return {};
     }
 
-    getClassList (attrs) {
+    getClassList (vnode) {
         return [];
     }
 
