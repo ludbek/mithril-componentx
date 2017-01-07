@@ -213,7 +213,7 @@ div#id[data-component=Component] {
 		});
 
 		it("removes invalid class names", () => {
-			expect(aComponent.getClass(["aclass", null, "", undefined])).to.equal("aclass");
+			expect(aComponent.getClass(["aclass", null, "", undefined, false])).to.equal("aclass");
 		});
 
 		it("includes user supplied class", () => {

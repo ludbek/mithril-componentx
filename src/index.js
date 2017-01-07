@@ -148,16 +148,17 @@ export class Component {
 	getClass (classList, userClass) {
 		return this.insertUserClass(classList, userClass)
 			.filter((aClass) => {
-				return [null, undefined, ""].indexOf(aClass) === -1;
+				return [null, undefined, "", false].indexOf(aClass) === -1;
 			})
 			.join(" ");
 	}
 
 	getAttrs (vnode) {
-		let defaultAttrs = this.getDefaultAttrs(vnode);
-		let newAttrs = [defaultAttrs, vnode.attrs].reduce(merge, {});
+		let defaultAttrs = this.getDefaultAttrs(vnode) || {};
+		let newAttrs = assign(defaultAttrs, vnode.attrs);
 
 		newAttrs.rootAttrs = [
+			defaultAttrs.rootAttrs || {},
 			newAttrs.rootAttrs || {},
 			{"data-component": this.constructor.name},
 			pickBy(newAttrs, this.isRootAttr)
