@@ -281,6 +281,11 @@ div#id[data-component=Component] {
 			let got = component.getAttrs({attrs: {}});
 			expect(got.rootAttrs).to.eql({"data-component": "XComponent"});
 		});
+
+		it("does not override 'data-component' from parent component.", () => {
+			let got = component.getAttrs({attrs: {"data-component": "YComponent"}});
+			expect(got.rootAttrs).to.eql({"data-component": "YComponent"});
+		});
 	});
 
 
@@ -449,6 +454,18 @@ div#id[data-component=Component] {
 			vnode.attrs.cha = 2;
 
 			expect(component.onbeforeupdate.bind(component, vnode)).to.throw(Error);
+		});
+	});
+
+	describe("constructor", () => {
+		it("mixes mixins", () => {
+			class XComponent extends Component { }
+
+			XComponent.prototype.mixins = [{one: 1}, {two: 2}];
+			let xComponent = new XComponent();
+
+			expect(xComponent.one).to.equal(1);
+			expect(xComponent.two).to.equal(2);
 		});
 	});
 });

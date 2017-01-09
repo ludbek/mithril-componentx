@@ -41,6 +41,13 @@ export const merge = (destination, source) => {
 };
 
 export class Component {
+	constructor () {
+		this.mixins = this.mixins || [];
+		this.mixins.reduce((acc, mixin) => {
+			assign(acc, mixin);
+			return acc;
+		}, this);
+	}
 	/*
 	 * Generates stylesheet based upon data returned by getStyle()
 	 * */
@@ -165,7 +172,8 @@ export class Component {
 		].reduce(merge, {})
 
 		let newClassName = this.getClass(
-				this.getClassList({attrs: newAttrs, children: vnode.children, state: vnode.state}),
+				this.getClassList(
+					{attrs: newAttrs, children: vnode.children, state: vnode.state}),
 				newAttrs.class);
 		if (newClassName) {
 			newAttrs.rootAttrs.class = newClassName;
