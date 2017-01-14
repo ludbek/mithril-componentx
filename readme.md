@@ -9,8 +9,13 @@ A component factory for [Mithril](https://github.com/lhorie/mithril.js).
 - default attributes
 - mixins
 - localized css
-- powerful class name generator for component's root.
-- transparent communicatin with componnent's root from hyperscript
+- powerful class name generator for component's root dom
+- transparent communicatin with componnent's root dom from hyperscript
+
+# Requirement
+- Mithril 1.x.x
+
+For Mithril 0.2.x please use version 0.5.x
 
 # Installation
 ## NPM
@@ -100,7 +105,6 @@ let page = new Page();
 // throws exception "Heading is required."
 m(page)
 
-// returns valid Mithril 0.2.x component
 m(page, {
 	heading: m("h1", "A heading"),
 	content: m("p", "A content")
@@ -265,8 +269,10 @@ to head just before component is mounted to the DOM. The style is attached only 
 class Dialog extends Component {
 	name: "dialog", // name is required for localizing style, else will throw error.
 	getStyle (vnode) {
-		// The JSON is one to one mapping of CSS as we will see later
+		// The JSON is one to one mapping of CSS as we will see later.
 		// If a property is in 'camelCase', it will be converted to 'snake-case'.
+		// The selector must start with root dom, in this example its ".tble",
+		// check the root dom at the view.
 		return {
 			".tbl": {
 				"display": "table",
