@@ -4,14 +4,13 @@ A component factory for [Mithril](https://github.com/lhorie/mithril.js).
 
 # Feature
 
-- Components compatible with [Mithril v1.x](https://github.com/lhorie/mithril.js/tree/rewrite).
-- Validates attributes passed to a component.
-- Extendable components.
-- Supports default attributes.
-- Supports mixins.
-- Localized style
-- Powerful class name generator for component's root.
-- Passes essential attributes directly to component's root.
+- class based component
+- attribute validation
+- default attributes
+- mixins
+- localized css
+- powerful class name generator for component's root.
+- transparent communicatin with componnent's root from hyperscript
 
 # Installation
 ## NPM
@@ -25,76 +24,79 @@ A component factory for [Mithril](https://github.com/lhorie/mithril.js).
 
 # Quick overview
 ```javascript
-import component from "mithril-componentx";
+import Component from "mithril-componentx";
 
-let grid = component({
-	getClassList (attrs) {
+class Grid extends Component {
+	getClassList (vnode) {
 		return [
 			"ui",
 			"grid"
 			];
-	},
-	view (vnode) {
-		let attrs = vnode.attrs;
+	}
+
+	view ({attrs, children, state}) {
 		return m("div", attrs.rootAttrs, vnode.children);
 	}
-});
+}
 
-let page = component({
+let grid = new Grid();
+
+class Page extends Component {
 	validateAttrs (attrs) {
 		if (!attrs.heading) throw Error("Heading is required.");
 		if (!attrs.content) throw Error("Content is required.");
-	},
-	view (vnode) {
-		return m("div",
-			vnode.attrs.heading,
-			vnode.attrs.content);
 	}
-});
 
-let itemsPage = component({
-	base: page,
+	view (vnode) {
+		return m("div", vnode.attrs.heading, vnode.attrs.content);
+	}
+}
+
+let page = new Page();
+
+class ItemsPage extends Page {
 	getDefaultAttrs (attrs) {
 		return {
 			heading: m("h1", "List of awesome stuff."),
 			content: m(grid, /*list of stuff*/)
 		};
 	}
-});
+}
+
+let itemsPage = new ItemsPage();
+
+m.render(document.body, itemsPage);
 
 ```
 
 # Create a component
-The component signature is similar to [`Mithril 1.x`](https://github.com/lhorie/mithril.js/blob/rewrite/docs/components.md).
-Except for the component's lifecycle methods.
-`mithril-componentx` supports only two lifecycle methods.
-
-1. `oninit`- called when component is initialized.
-2. `onremove` - called when component is detached.
 
 ```javascript
-import component from "mithril-componentx";
+import Component from "mithril-componentx";
 
-let page = component({
+class Page extends Component {
 	oninit (vnode) {
 		// do some initialization
-	},
-	onremove () {
+	}
+
+	onremove (vnode) {
 		// do some clean up
-	},
+	}
+
 	validateAttrs (attrs) {
 		if (!attrs.heading) throw Error("Heading is required.");
 		if (!attrs.content) throw Error("Content is required.");
-	},
-	view (vnode) {
-		return m("div",
-			vnode.attrs.heading,
-			vnode.attrs.content);
 	}
-});
+
+	view (vnode) {
+		return m("div", vnode.attrs.heading, vnode.attrs.content);
+	}
+}
 ```
 # Using a component
 ```javascript
+let page = new Page();
+
 // throws exception "Heading is required."
 m(page)
 
@@ -105,68 +107,59 @@ m(page, {
 })
 ```
 
-# Vnode
-A component's view gets `vnode`.
-It has three properties:
-
-1. `attrs` - the attributes passed through hyperscript i.e. `m`
-2. `children` - the child elements passed through hyperscript
-3. `state` - the component itself
-
-The component properties and methods can be accessed through 
-`vnode.state` and `this` at view.
-
-```javascript
-var button = component({
-	submit (e) {
-		/* do someting */
-	},
-	view (vnode) {
-		//return m("button", {onclick: this.submit}) or
-		return m("button", {onclick: vnode.state.submit});
-	}
-
-});
-```
-
 # Extending a component
 Specify a base for new component. New properties overrides base properties.
 However the base component is available at new component's `base` property.
 
 ```javascript
-let button = component({
-	getClassList (attrs) {
+class Button extends Component {
+	getClassList (vnode) {
 		return [
 			"ui",
 			"button"
 			];
-	},
+	}
+
 	submit (e) {
 		/* submit form */
-	},
+	}
+
 	view (vnode) {
 		return m(attrs.root, attrs.rootAttrs, {onclick: this.submit}, "Submit")
 	}
-});
+}
 
 
-let primaryButton = component({
-	base: button,
-	getClassList (attrs) {
-		// access base method
-		let classList = this.base.getClassList.bind(this, attrs);
+class PrimaryButton extends Button {
+	getClassList (vnode) {
+		let classList = super.getClassList(vnode);
 		classList.unshift("primary");
 		return classList;
 	}
-});
+}
 ```
 
 # Validate attributes
-Every time a component is rendered, its `validateAttrs` method is called.
+Every time a component is mounted or updated, its `validateAttrs` method is called.
 One should check attributes and raise exception as per required.
 
-In the example above rendering `page` without `heading` or `content` will throw error.
+In the example below rendering `page` without `heading` or `content` will throw error.
 ```javascript
+import Component from "mithril-componentx";
+
+class Page extends Component {
+	validateAttrs (attrs) {
+		if (!attrs.heading) throw Error("Heading is required.");
+		if (!attrs.content) throw Error("Content is required.");
+	}
+
+	view (vnode) {
+		return m("div", vnode.attrs.heading, vnode.attrs.content);
+	}
+}
+
+let page = new Page();
+
 // throws exception "Heading is required."
 m(page)
 
@@ -182,25 +175,31 @@ Components can have default attributes which are merged with attributes passed b
 User passed attributes override default attributes.
 
 ```javascript
-let redButton = component({
-	getDefaultAttrs (attrs) {
+class RedButton extends Component {
+	getDefaultAttrs (vnode) {
 		return {color: "red"};
-	},
-	getClassList (attrs) {
+	}
+
+	getClassList (vnode) {
 		return ["ui", attrs.color, "button"]
-	},
+	}
+
 	view (vnode) {
 		return m("button", vnode.attrs.rootAttrs, vnode.children);
 	}
-});
+}
+
+let redButton = new RedButton();
 
 // change color to blue
-m(redButton, {color: "blue"}, "Blue button")
+m(redButton, {color: "blue"}, "Blue button");
 ```
 
 
 # Mixins
-Components can share mixins.
+Components can be composed out of mixins.
+Mixins are plain javascript objects not a class.
+Attach mixins at component's prototype chain because mixins are applied while instanciating an object.
 
 ```javascript
 let buttonValidator : {
@@ -210,7 +209,7 @@ let buttonValidator : {
 }
 
 let roundedCorners: {
-	getDefaultAttrs (attrs) {
+	getDefaultAttrs (vnode) {
 		return {
 			style: {
 				"border-radius": "5px"
@@ -220,7 +219,7 @@ let roundedCorners: {
 }
 
 let sharpCorners: {
-	getDefaultAttrs (attrs) {
+	getDefaultAttrs (vnode) {
 		return {
 			style: {
 				"border-radius": "0px"
@@ -230,20 +229,22 @@ let sharpCorners: {
 }
 
 
-let button1 = component({
-	mixins: [buttonValidator, roundedCorners],
+class Button1 extends Component {
 	view (vnode) {
 		return m("button", vnode.attrs.rootAttrs, vnode.attrs.label);
 	}
-});
+}
+
+Button1.prototype.mixins = [buttonValidator, roundedCorners];
 
 
-let button1 = component({
-	mixins: [buttonValidator, sharpCorners],
+class Button2 extends Component {
 	view (vnode) {
 		return m("button", vnode.attrs.rootAttrs, vnode.attrs.label);
 	}
-});
+}
+
+Button2.prototype.mixins = [buttonValidator, sharpCorners];
 ```
 
 # Localized styling
@@ -261,10 +262,11 @@ returns JSON. Thus returned JSON is converted to proper CSS and attached
 to head just before component is mounted to the DOM. The style is attached only once per component type.
 
 ```javascript
-let dialog  = component({
+class Dialog extends Component {
 	name: "dialog", // name is required for localizing style, else will throw error.
 	getStyle (vnode) {
-		// the JSON is one to one mapping of CSS as we will see later
+		// The JSON is one to one mapping of CSS as we will see later
+		// If a property is in 'camelCase', it will be converted to 'snake-case'.
 		return {
 			".tbl": {
 				"display": "table",
@@ -273,28 +275,29 @@ let dialog  = component({
 			".tbl .tbl-cl": {
 				"display": "table-cell",
 				"vertical-align": "middle",
-				"text-align": "center"
+				"textAlign": "center" // 'textAlign' be converted to 'text-align'
 			}
 		};
-	},
+	}
+
 	view (vnode) {
 		// rootAttrs has attribute which helps localize the style
-		// in this case its [data-component=dialog]
+		// in this case its [data-component=Dialog]
 		return m(".tbl", vnode.attrs.rootAttrs,
 			m(".tbl-cl", vnode.children));
 	}
-});
+}
 ```
 
 The style in above example is attached to head in following format.
 ```css
-<style id="dialog-style">
+<style id="Dialog-style">
 // data-component is the attribute of root dom
-[data-component=dialog].tbl {
+[data-component=Dialog].tbl {
   display: table;
   height: 100%;
 }
-[data-component=dialog].tbl .tbl-cl {
+[data-component=Dialog].tbl .tbl-cl {
   display: table-cell;
   vertical-align: middle;
   text-align: center;
@@ -307,12 +310,14 @@ Attributes like `id, style, on* (event handlers), data-* and class` are made ava
 `vnode.attrs.rootAttrs`.
 
 ```javascript
-let button = component({
+class Button extends Component {
 	view (vnode) {
 		let rootAttrs = vnode.attrs.rootAttrs;
 		return m("button", rootAttrs, vnode.children);
 	}
-});
+}
+
+let button = new Button();
 
 m(button, {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "red"}}, "Like");
 // vnode.attrs.rootAttrs = {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "red"}}
@@ -321,15 +326,18 @@ m(button, {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "re
 Override `isRootAttr` method to change the default behaviour.
 
 ```javascript
-let button = component({
+class Button extends Component {
 	isRootAttr (key) {
 		return /^(onclick|style)$/.test(key)? true: false;
-	},
+	}
+
 	view (vnode) {
 		let rootAttrs = vnode.attrs.rootAttrs;
 		return m("button", rootAttrs, vnode.children);
 	}
-});
+}
+
+let button = new Button();
 
 m(button, {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "red"}}, "Like");
 // vnode.attrs.rootAttrs = {onclick: acallback,style: {color: "red"}}
@@ -337,24 +345,27 @@ m(button, {id: "aButton", onclick: acallback, "data-item": 1, style: {color: "re
 
 # Class name for component's root
 Class name for component's root is generated from `getClassList()` and is made available at
-`vnode.attrs.rootAttrs.className`. Class name is generated using excellent [classnames](https://github.com/JedWatson/classnames).
+`vnode.attrs.rootAttrs.className`.
+Falsy values like `null`, `undefined`, `fals` and `''` are excluded while generating class string.
 User supplied class is merged with component's class list.
 
 ```javascript
-let button = component({
-	getClassList (attrs) {
+class Button extends Component {
+	getClassList (vnode) {
 		return [
 			"ui",
-			{loading: attrs.loading},
-			{disabled: attrs.disabled},
+			attrs.loading && "loading",
+			attrs.disabled && "disabled",
 			"button"
 		];
-	},
+	}
+
 	view (vnode) {
 		return m("button", vnode.attrs.rootAttrs, children);
 	}
-});
+}
 
+let button = new Button();
 
 m(button, {disabled: true, class: "blue"}, "Click");
 // <button class="ui disabled blue button"></button>
