@@ -86,6 +86,12 @@ export class Component {
 	 * This increases specificity.
 	 * */
 	localizeSelector (key, componentName) {
+        if (key.indexOf(":") !== -1) {
+			let frags = key.split(":");
+			frags[0] = this.localizeSelector(frags[0], componentName);
+			return frags.join(":");
+        }
+
         if (key.indexOf(",") !== -1) {
             return key.split(",").map((frag) => {
                 return this.localizeSelector(frag.trim(), componentName);

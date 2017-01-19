@@ -83,6 +83,9 @@ describe("Component", () => {
 				"div.class": {
 					xxx: "xxx"
 				},
+				"div.class:hover": {
+					xxx: "xxx"
+				},
 				"div#id": {
 					xxx: "xxx"
 				},
@@ -126,6 +129,9 @@ div.class[data-component=Component], p[data-component=Component], #aId[data-comp
   xxx: xxx rgb(1, 2, 3);
 }
 div.class[data-component=Component] {
+  xxx: xxx;
+}
+div.class[data-component=Component]:hover {
   xxx: xxx;
 }
 div#id[data-component=Component] {
