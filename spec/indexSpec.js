@@ -1,7 +1,8 @@
+import {window} from "./utils.js";
 import {Component, merge} from "../src/index.js";
 import chai from "chai";
-import {mocks} from "mock-browser";
-
+import o from "mithril";
+import sinon from "sinon";
 
 let expect = chai.expect;
 
@@ -174,10 +175,6 @@ div#id[data-component=Component] {
 	});
 
 	describe("attachStyle", () => {
-		before(() => {
-			global.document = new mocks.MockBrowser().getDocument();
-		});
-
 		it("attaches given style to head", () => {
 			let aComponent = new Component();
 			aComponent.attachStyle("hello there");
@@ -185,10 +182,6 @@ div#id[data-component=Component] {
 
 			expect(style).to.exist;
 			expect(style.textContent).to.equal("hello there");
-		});
-
-		after(() => {
-			delete global.document;
 		});
 	});
 
@@ -345,8 +338,6 @@ div#id[data-component=Component] {
 		let vnode, component;
 
 		beforeEach(() => {
-			global.document = new mocks.MockBrowser().getDocument();
-
 			vnode = {
 				attrs: {
 					nye: 2
@@ -409,6 +400,11 @@ div#id[data-component=Component] {
 			let style = document.querySelectorAll("#XComponent-style");
 			expect(style.length).to.equal(1);
 		});
+
+		it("caches vnode", () => {
+			component.oninit(vnode);
+			expect(component.vnode.attrs.nye).to.equal(2);
+		});
     });
 
 	describe("onbeforeupdate", () => {
@@ -461,6 +457,11 @@ div#id[data-component=Component] {
 
 			expect(component.onbeforeupdate.bind(component, vnode)).to.throw(Error);
 		});
+
+		it("caches vnode", () => {
+			component.onbeforeupdate(vnode);
+			expect(component.vnode.attrs.nye).to.equal(2);
+		});
 	});
 
 	describe("constructor", () => {
@@ -472,6 +473,85 @@ div#id[data-component=Component] {
 
 			expect(xComponent.one).to.equal(1);
 			expect(xComponent.two).to.equal(2);
+		});
+	});
+
+	describe("cacheVnode", () => {
+		it("stores vnode to component instance", () => {
+			let c = new Component();
+			let vnode = {cha: 1};
+			c.cacheVnode(vnode);
+			expect(c.vnode.cha).to.equal(1);
+		});
+	});
+
+	describe("redraw", () => {
+		it("renders isolated view to root element", () => {
+			class XComponent extends Component {
+				isolatedView (vnode) {
+					return o('p#p');
+				}
+
+				view (vnode) {
+					return o("div");
+				}
+			}
+
+			let c = new XComponent();
+			o.render(document.body, o(c));
+
+			let p = document.getElementById("p");
+			expect(p).to.exist;
+		});
+	});
+
+	describe("oncreate", () => {
+		let c, redraw;
+
+		it("redraws if 'isolatedView' is present.", () => {
+			class XComponent extends Component {
+				isolatedView () {}
+			}
+
+			c = new XComponent();
+			redraw = sinon.stub(c, "redraw");
+			c.oncreate();
+			expect(redraw.calledOnce).to.equal(true);
+		});
+
+		it("wont redraw if 'isolatedView' is absent.", () => {
+			class XComponent extends Component {
+			}
+
+			c = new XComponent();
+			redraw = sinon.spy(c, "redraw");
+			c.oncreate();
+			expect(redraw.calledOnce).to.equal(false);
+		});
+	});
+
+	describe("onupdate", () => {
+		let c, redraw;
+
+		it("redraws if 'isolatedView' is present.", () => {
+			class XComponent extends Component {
+				isolatedView () {}
+			}
+
+			c = new XComponent();
+			redraw = sinon.stub(c, "redraw");
+			c.onupdate();
+			expect(redraw.calledOnce).to.equal(true);
+		});
+
+		it("wont redraw if 'isolatedView' is absent.", () => {
+			class XComponent extends Component {
+			}
+
+			c = new XComponent();
+			redraw = sinon.spy(c, "redraw");
+			c.onupdate();
+			expect(redraw.calledOnce).to.equal(false);
 		});
 	});
 });

@@ -1,3 +1,5 @@
+import o from "mithril";
+
 const LIFECYCLE_METHODS = [
 	"oninit",
 	"oncreate",
@@ -198,10 +200,20 @@ export class Component {
 
     validateAttrs (attrs) {}
 
+	cacheVnode (vnode) {
+		this.vnode = vnode;
+	}
+
+	redraw () {
+		o.render(this.vnode.dom, this.isolatedView());
+	}
+
 	oninit (vnode) {
 		vnode.attrs = vnode.attrs || {};
 		vnode.attrs = this.getAttrs(vnode);
 		this.validateAttrs(vnode.attrs);
+
+		this.cacheVnode(vnode);
 
 		let style = this.getStyle(vnode);
 		let cName = this.constructor.name;
@@ -211,9 +223,18 @@ export class Component {
 		this.attachStyle(this.genStyle(style, cName), cName);
 	}
 
+	oncreate (vnode) {
+		this.isolatedView && this.redraw();
+	}
+
+	onupdate (vnode) {
+		this.isolatedView && this.redraw();
+	}
+
 	onbeforeupdate (vnode) {
 		vnode.attrs = vnode.attrs || {};
 		vnode.attrs = this.getAttrs(vnode);
 		this.validateAttrs(vnode.attrs);
+		this.cacheVnode(vnode);
 	}
 };
