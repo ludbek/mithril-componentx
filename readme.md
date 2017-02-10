@@ -376,3 +376,48 @@ let button = new Button();
 m(button, {disabled: true, class: "blue"}, "Click");
 // <button class="ui disabled blue button"></button>
 ```
+
+# Isolated component
+Isolated components can be individually redrawn without diffing entire Mithril app.
+Any component which implements `isolatedView()` method can be individually redrawn using `redraw()` method.
+
+The dom returned by `isolatedView()` is rendered at the root dom return by `view()`.
+The isolated components do redraw in response to global app redraw.
+To completly isolate it from app return `false` from `onbeforeupdate`.
+
+View example below live [here](http://jsbin.com/bexezeh/edit?js,console,output).
+```javascript
+class Clock extends component {
+  oninit (vnode) {
+    super.oninit(vnode);
+    this.timer = setInterval(() => {
+      this.time = new Date() + "";
+      this.redraw();
+    }, 1000);
+  }
+  onremove (vnode) {
+    clearInterval(this.timer);
+  }
+  isolatedView (vnode) {
+    console.log("@ clock isolated view");
+    return m("span", this.time);
+  }
+  view (vnode) {
+    console.log("@ clock root element");
+    return m("h1");
+  }
+}
+
+var clock = new Clock();
+
+class App extends component { 
+  view (vnode) {
+    console.log("@ app");
+    return m("div", m(clock));
+  }
+}
+
+var app = new App();
+
+m.mount(document.body, app);
+```

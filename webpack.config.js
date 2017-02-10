@@ -7,7 +7,7 @@ module.exports = {
   output: {
     path: __dirname + '/dist/',
     filename: 'component.min.js',
-    library: 'component',
+    library: 'Component',
     libraryTarget: 'var'
   },
   externals: {},
