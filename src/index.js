@@ -205,7 +205,7 @@ export class Component {
 	}
 
 	redraw () {
-		o.render(this.vnode.dom, this.isolatedView());
+		o.render(this.vnode.dom, this.isolatedView(this.vnode));
 	}
 
 	oninit (vnode) {
