@@ -387,7 +387,7 @@ To completly isolate it from app return `false` from `onbeforeupdate`.
 
 View example below live [here](http://jsbin.com/bexezeh/edit?js,console,output).
 ```javascript
-class Clock extends component {
+class Clock extends Component {
   oninit (vnode) {
     super.oninit(vnode);
     this.timer = setInterval(() => {
@@ -410,7 +410,7 @@ class Clock extends component {
 
 var clock = new Clock();
 
-class App extends component { 
+class App extends Component { 
   view (vnode) {
     console.log("@ app");
     return m("div", m(clock));
