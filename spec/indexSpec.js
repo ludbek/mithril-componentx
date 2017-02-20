@@ -174,6 +174,27 @@ div#id[data-component=Component] {
 
 	});
 
+	describe("getComponentName", () => {
+		it("returns 'displayName' if present.", () => {
+			class Button extends Component {
+				displayName = "Explicit Name"
+			}
+
+			let b = new Button();
+
+			expect(b.getComponentName()).to.equal("Explicit Name");
+		});
+
+		it("returns 'constructor.name' if 'displayName' is absent", () => {
+			class Button extends Component {
+			}
+
+			let b = new Button();
+
+			expect(b.getComponentName()).to.equal("Button");
+		});
+	});
+
 	describe("attachStyle", () => {
 		it("attaches given style to head", () => {
 			let aComponent = new Component();

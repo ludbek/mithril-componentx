@@ -43,6 +43,10 @@ export const merge = (destination, source) => {
 };
 
 export class Component {
+	getComponentName () {
+		return this.displayName || this.constructor.name;
+	}
+
 	constructor () {
 		this.mixins = this.mixins || [];
 		this.mixins.reduce((acc, mixin) => {
@@ -54,7 +58,7 @@ export class Component {
 	 * Generates stylesheet based upon data returned by getStyle()
 	 * */
 	genStyle (jsStyle) {
-		let componentName = this.constructor.name;
+		let componentName = this.getComponentName();
 		let genSingleLevel = (js, indent = 1) => {
 			let leftPad = new Array(indent).join(" ");
 			let css = "";
@@ -117,7 +121,7 @@ export class Component {
 	 * Attach styles to the head
 	 * */
 	attachStyle (style) {
-		let componentName = this.constructor.name;
+		let componentName = this.getComponentName();
 		let node = document.createElement("style");
 		node.id = componentName + "-style";
 
@@ -175,7 +179,7 @@ export class Component {
 		newAttrs.rootAttrs = [
 			defaultAttrs.rootAttrs || {},
 			newAttrs.rootAttrs || {},
-			{"data-component": this.constructor.name},
+			{"data-component": this.getComponentName()},
 			pickBy(newAttrs, this.isRootAttr)
 		].reduce(merge, {})
 
@@ -216,7 +220,7 @@ export class Component {
 		this.cacheVnode(vnode);
 
 		let style = this.getStyle(vnode);
-		let cName = this.constructor.name;
+		let cName = this.getComponentName();
 
 		if (!style || style && document.getElementById(cName + "-style")) return;
 
