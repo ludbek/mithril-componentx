@@ -1,6 +1,6 @@
 {
   "name": "mithril-componentx",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Component factory for Mithriljs.",
   "main": "index.js",
   "scripts": {

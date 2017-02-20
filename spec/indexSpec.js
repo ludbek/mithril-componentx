@@ -177,7 +177,7 @@ div#id[data-component=Component] {
 	describe("getComponentName", () => {
 		it("returns 'displayName' if present.", () => {
 			class Button extends Component {
-				displayName = "Explicit Name"
+				static displayName = "Explicit Name"
 			}
 
 			let b = new Button();
