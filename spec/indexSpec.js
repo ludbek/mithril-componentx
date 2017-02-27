@@ -1,12 +1,17 @@
-import {window} from "./utils.js";
-import {Component, merge} from "../src/index.js";
+import {
+	window
+} from "./utils.js";
+import {
+	Component,
+	merge
+} from "../src/index.js";
 import chai from "chai";
 import o from "mithril";
 import sinon from "sinon";
 
 let expect = chai.expect;
 
-let noop = function () {};
+let noop = function() {};
 
 
 describe("merge", () => {
@@ -186,8 +191,7 @@ div#id[data-com=Component] {
 		});
 
 		it("returns 'constructor.name' if 'displayName' is absent", () => {
-			class Button extends Component {
-			}
+			class Button extends Component {}
 
 			let b = new Button();
 
@@ -245,22 +249,28 @@ div#id[data-com=Component] {
 		let component;
 		beforeEach(() => {
 			class XComponent extends Component {
-				getDefaultAttrs () {
-					return {cha: 1};
+				getDefaultAttrs() {
+					return {
+						cha: 1
+					};
 				}
 
-				getClassList () {
+				getClassList() {
 					return [];
 				}
 
-				view () {}
+				view() {}
 			}
 
 			component = new XComponent();
 		});
 
 		it("merges user supplied attributes with default attributes.", () => {
-			let got = component.getAttrs({attrs: {nye: 2}});
+			let got = component.getAttrs({
+				attrs: {
+					nye: 2
+				}
+			});
 			let expected = {
 				cha: 1,
 				nye: 2,
@@ -272,7 +282,11 @@ div#id[data-com=Component] {
 		});
 
 		it("attaches class to root element attributes", () => {
-			let got = component.getAttrs({attrs: {class: "aclass"}});
+			let got = component.getAttrs({
+				attrs: {
+					class: "aclass"
+				}
+			});
 			let expected = {
 				class: "aclass",
 				cha: 1,
@@ -285,7 +299,11 @@ div#id[data-com=Component] {
 		});
 
 		it("attaches 'id' to root element attributes", () => {
-			let got = component.getAttrs({attrs: {id: "aId"}});
+			let got = component.getAttrs({
+				attrs: {
+					id: "aId"
+				}
+			});
 			let expected = {
 				id: "aId",
 				cha: 1,
@@ -298,13 +316,23 @@ div#id[data-com=Component] {
 		});
 
 		it("attaches component name to root element attributes.", () => {
-			let got = component.getAttrs({attrs: {}});
-			expect(got.rootAttrs).to.eql({"data-com": "XComponent"});
+			let got = component.getAttrs({
+				attrs: {}
+			});
+			expect(got.rootAttrs).to.eql({
+				"data-com": "XComponent"
+			});
 		});
 
 		it("does not override 'data-com' from parent component.", () => {
-			let got = component.getAttrs({attrs: {"data-com": "YComponent"}});
-			expect(got.rootAttrs).to.eql({"data-com": "YComponent"});
+			let got = component.getAttrs({
+				attrs: {
+					"data-com": "YComponent"
+				}
+			});
+			expect(got.rootAttrs).to.eql({
+				"data-com": "YComponent"
+			});
 		});
 	});
 
@@ -366,17 +394,17 @@ div#id[data-com=Component] {
 			};
 
 			class XComponent extends Component {
-				validateAttrs (attrs) {
+				validateAttrs(attrs) {
 					if (attrs.cha !== 1) throw Error("'Cha' should be 1.");
 				}
 
-				getDefaultAttrs (vnode) {
+				getDefaultAttrs(vnode) {
 					return {
 						cha: 1
 					};
 				}
 
-				getStyle (vnode) {
+				getStyle(vnode) {
 					return {
 						"div": {
 							"background-color": "#fff"
@@ -426,7 +454,7 @@ div#id[data-com=Component] {
 			component.oninit(vnode);
 			expect(component.vnode.attrs.nye).to.equal(2);
 		});
-    });
+	});
 
 	describe("onbeforeupdate", () => {
 		let vnode, component;
@@ -439,17 +467,17 @@ div#id[data-com=Component] {
 			};
 
 			class XComponent extends Component {
-				validateAttrs (attrs) {
+				validateAttrs(attrs) {
 					if (attrs.cha !== 1) throw Error("'Cha' should be 1.");
 				}
 
-				getDefaultAttrs (vnode) {
+				getDefaultAttrs(vnode) {
 					return {
 						cha: 1
 					};
 				}
 
-				getStyle (vnode) {
+				getStyle(vnode) {
 					return {
 						"div": {
 							"background-color": "#fff"
@@ -487,9 +515,13 @@ div#id[data-com=Component] {
 
 	describe("constructor", () => {
 		it("mixes mixins", () => {
-			class XComponent extends Component { }
+			class XComponent extends Component {}
 
-			XComponent.prototype.mixins = [{one: 1}, {two: 2}];
+			XComponent.prototype.mixins = [{
+				one: 1
+			}, {
+				two: 2
+			}];
 			let xComponent = new XComponent();
 
 			expect(xComponent.one).to.equal(1);
@@ -500,7 +532,9 @@ div#id[data-com=Component] {
 	describe("cacheVnode", () => {
 		it("stores vnode to component instance", () => {
 			let c = new Component();
-			let vnode = {cha: 1};
+			let vnode = {
+				cha: 1
+			};
 			c.cacheVnode(vnode);
 			expect(c.vnode.cha).to.equal(1);
 		});
@@ -509,11 +543,11 @@ div#id[data-com=Component] {
 	describe("redraw", () => {
 		it("renders isolated view to root element", () => {
 			class XComponent extends Component {
-				isolatedView (vnode) {
+				isolatedView(vnode) {
 					return o('p#p');
 				}
 
-				view (vnode) {
+				view(vnode) {
 					return o("div");
 				}
 			}
@@ -527,9 +561,9 @@ div#id[data-com=Component] {
 
 		it("component's state and vnode's state have same reference", () => {
 			class XComponent extends Component {
-				constructor () {
-						super();
-						this.name = "A component";
+				constructor() {
+					super();
+					this.name = "A component";
 				}
 
 				updateName() {
@@ -537,11 +571,13 @@ div#id[data-com=Component] {
 					this.redraw();
 				}
 
-				isolatedView (vnode) {
-					return o('p#p', {onclick: this.updateName.bind(this)}, this.name);
+				isolatedView(vnode) {
+					return o('p#p', {
+						onclick: this.updateName.bind(this)
+					}, this.name);
 				}
 
-				view (vnode) {
+				view(vnode) {
 					return o("div");
 				}
 			}
@@ -561,7 +597,7 @@ div#id[data-com=Component] {
 
 		it("redraws if 'isolatedView' is present.", () => {
 			class XComponent extends Component {
-				isolatedView () {}
+				isolatedView() {}
 			}
 
 			c = new XComponent();
@@ -571,8 +607,7 @@ div#id[data-com=Component] {
 		});
 
 		it("wont redraw if 'isolatedView' is absent.", () => {
-			class XComponent extends Component {
-			}
+			class XComponent extends Component {}
 
 			c = new XComponent();
 			redraw = sinon.spy(c, "redraw");
@@ -586,7 +621,7 @@ div#id[data-com=Component] {
 
 		it("redraws if 'isolatedView' is present.", () => {
 			class XComponent extends Component {
-				isolatedView () {}
+				isolatedView() {}
 			}
 
 			c = new XComponent();
@@ -596,8 +631,7 @@ div#id[data-com=Component] {
 		});
 
 		it("wont redraw if 'isolatedView' is absent.", () => {
-			class XComponent extends Component {
-			}
+			class XComponent extends Component {}
 
 			c = new XComponent();
 			redraw = sinon.spy(c, "redraw");

@@ -33,8 +33,7 @@ export const merge = (destination, source) => {
 	Object.keys(source).forEach((key) => {
 		if (isObject(source[key])) {
 			destination[key] = merge(isObject(destination[key]) && destination[key] || {}, source[key]);
-		}
-		else {
+		} else {
 			destination[key] = source[key];
 		}
 	});
@@ -43,11 +42,11 @@ export const merge = (destination, source) => {
 };
 
 export class Component {
-	getComponentName () {
+	getComponentName() {
 		return this.constructor.displayName || this.constructor.name;
 	}
 
-	constructor () {
+	constructor() {
 		this.mixins = this.mixins || [];
 		this.mixins.reduce((acc, mixin) => {
 			assign(acc, mixin);
@@ -57,7 +56,7 @@ export class Component {
 	/*
 	 * Generates stylesheet based upon data returned by getStyle()
 	 * */
-	genStyle (jsStyle) {
+	genStyle(jsStyle) {
 		let componentName = this.getComponentName();
 		let genSingleLevel = (js, indent = 1) => {
 			let leftPad = new Array(indent).join(" ");
@@ -71,8 +70,7 @@ export class Component {
 						css += genSingleLevel(js[key], indent + 2);
 
 						css += leftPad + "}\n";
-					}
-					else {
+					} else {
 						// convert camelcase to snake case
 						let normalizedKey = key.replace(/([A-Z])/g, `-$1`).toLowerCase();
 						css += leftPad + normalizedKey + ": " + js[key] + ";\n";
@@ -91,18 +89,18 @@ export class Component {
 	 * Attaches component name to the key.
 	 * This increases specificity.
 	 * */
-	localizeSelector (key, componentName) {
-        if (key.indexOf(":") !== -1) {
+	localizeSelector(key, componentName) {
+		if (key.indexOf(":") !== -1) {
 			let frags = key.split(":");
 			frags[0] = this.localizeSelector(frags[0], componentName);
 			return frags.join(":");
-        }
+		}
 
-        if (key.indexOf(",") !== -1) {
-            return key.split(",").map((frag) => {
-                return this.localizeSelector(frag.trim(), componentName);
-            }).join(", ");
-        }
+		if (key.indexOf(",") !== -1) {
+			return key.split(",").map((frag) => {
+				return this.localizeSelector(frag.trim(), componentName);
+			}).join(", ");
+		}
 
 		return key
 			.replace(/^([^@,%\s]*?)$/, `$1[data-com=${componentName}]`)
@@ -115,12 +113,12 @@ export class Component {
 	/*
 	 * Returns json which will be used by genStyles() to generate stylesheet for this component.
 	 * */
-    getStyle (vnode) {}
+	getStyle(vnode) {}
 
 	/*
 	 * Attach styles to the head
 	 * */
-	attachStyle (style) {
+	attachStyle(style) {
 		let componentName = this.getComponentName();
 		let node = document.createElement("style");
 		node.id = componentName + "-style";
@@ -137,34 +135,31 @@ export class Component {
 	/*
 	 * Returns true for attirbutes which are selected for root dom of the component.
 	 * */
-	isRootAttr (key) {
+	isRootAttr(key) {
 		if (LIFECYCLE_METHODS.indexOf(key) !== -1) return false;
 
 		try {
-			return /^(key|id|style|on.*|data-.*|config)$/.test(key)? true: false;
-		}
-		catch (err) {
+			return /^(key|id|style|on.*|data-.*|config)$/.test(key) ? true : false;
+		} catch (err) {
 			if (err instanceof TypeError) {
 				return false;
 			}
 		}
 	}
 
-	insertUserClass (classList, userClass) {
-	  if (classList.length == 0) {
-		return [userClass];
-	  }
-	  else if (classList.length == 1) {
-		classList.unshift(userClass);
-		return classList;
-	  }
-	  else {
-		classList.splice(1,0, userClass);
-		return classList;
-	  }
+	insertUserClass(classList, userClass) {
+		if (classList.length == 0) {
+			return [userClass];
+		} else if (classList.length == 1) {
+			classList.unshift(userClass);
+			return classList;
+		} else {
+			classList.splice(1, 0, userClass);
+			return classList;
+		}
 	}
 
-	getClass (classList, userClass) {
+	getClass(classList, userClass) {
 		return this.insertUserClass(classList, userClass)
 			.filter((aClass) => {
 				return [null, undefined, "", false].indexOf(aClass) === -1;
@@ -172,21 +167,26 @@ export class Component {
 			.join(" ");
 	}
 
-	getAttrs (vnode) {
+	getAttrs(vnode) {
 		let defaultAttrs = this.getDefaultAttrs(vnode) || {};
 		let newAttrs = assign(defaultAttrs, vnode.attrs);
 
 		newAttrs.rootAttrs = [
 			defaultAttrs.rootAttrs || {},
 			newAttrs.rootAttrs || {},
-			{"data-com": this.getComponentName()},
+			{
+				"data-com": this.getComponentName()
+			},
 			pickBy(newAttrs, this.isRootAttr)
 		].reduce(merge, {})
 
 		let newClassName = this.getClass(
-				this.getClassList(
-					{attrs: newAttrs, children: vnode.children, state: vnode.state}),
-				newAttrs.class);
+			this.getClassList({
+				attrs: newAttrs,
+				children: vnode.children,
+				state: vnode.state
+			}),
+			newAttrs.class);
 		if (newClassName) {
 			newAttrs.rootAttrs.class = newClassName;
 		}
@@ -194,25 +194,25 @@ export class Component {
 		return newAttrs;
 	}
 
-    getDefaultAttrs (vnode) {
-        return {};
-    }
+	getDefaultAttrs(vnode) {
+		return {};
+	}
 
-    getClassList (vnode) {
-        return [];
-    }
+	getClassList(vnode) {
+		return [];
+	}
 
-    validateAttrs (attrs) {}
+	validateAttrs(attrs) {}
 
-	cacheVnode (vnode) {
+	cacheVnode(vnode) {
 		this.vnode = vnode;
 	}
 
-	redraw () {
+	redraw() {
 		o.render(this.vnode.dom, this.isolatedView(this.vnode));
 	}
 
-	oninit (vnode) {
+	oninit(vnode) {
 		vnode.attrs = vnode.attrs || {};
 		vnode.attrs = this.getAttrs(vnode);
 		this.validateAttrs(vnode.attrs);
@@ -227,15 +227,15 @@ export class Component {
 		this.attachStyle(this.genStyle(style, cName), cName);
 	}
 
-	oncreate (vnode) {
+	oncreate(vnode) {
 		this.isolatedView && this.redraw();
 	}
 
-	onupdate (vnode) {
+	onupdate(vnode) {
 		this.isolatedView && this.redraw();
 	}
 
-	onbeforeupdate (vnode) {
+	onbeforeupdate(vnode) {
 		vnode.attrs = vnode.attrs || {};
 		vnode.attrs = this.getAttrs(vnode);
 		this.validateAttrs(vnode.attrs);
