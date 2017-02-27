@@ -524,6 +524,36 @@ div#id[data-component=Component] {
 			let p = document.getElementById("p");
 			expect(p).to.exist;
 		});
+
+		it("component's state and vnode's state have same reference", () => {
+			class XComponent extends Component {
+				constructor () {
+						super();
+						this.name = "A component";
+				}
+
+				updateName() {
+					this.name = "Updated component"
+					this.redraw();
+				}
+
+				isolatedView (vnode) {
+					return o('p#p', {onclick: this.updateName.bind(this)}, this.name);
+				}
+
+				view (vnode) {
+					return o("div");
+				}
+			}
+
+			let c = new XComponent();
+			o.render(document.body, o(c));
+
+			let p = document.getElementById("p");
+			expect(p.textContent).to.equal("A component");
+			p.onclick();
+			expect(p.textContent).to.equal("Updated component");
+		});
 	});
 
 	describe("oncreate", () => {
