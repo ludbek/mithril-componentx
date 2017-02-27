@@ -118,37 +118,37 @@ describe("Component", () => {
 			};
 
 			expectedStyle = `
-div[data-component=Component] {
+div[data-com=Component] {
   xxx: xxx;
   yyy: yyy;
 }
-div[data-component=Component] .class {
+div[data-com=Component] .class {
   xxx: xxx;
   yyy: yyy;
 }
-div.class[data-component=Component], p[data-component=Component], #aId[data-component=Component] {
+div.class[data-com=Component], p[data-com=Component], #aId[data-com=Component] {
   xxx: xxx rgb(1, 2, 3);
 }
-div.class[data-component=Component] {
+div.class[data-com=Component] {
   xxx: xxx;
 }
-div.class[data-component=Component]:hover {
+div.class[data-com=Component]:hover {
   xxx: xxx;
 }
-div#id[data-component=Component] {
+div#id[data-com=Component] {
   xxx: xxx;
 }
-.class[data-component=Component] {
+.class[data-com=Component] {
   xxx: xxx;
 }
-#id[data-component=Component] {
+#id[data-com=Component] {
   xxx: xxx;
 }
 @media xxx {
-  div[data-component=Component] {
+  div[data-com=Component] {
     xxx: xxx;
   }
-  .class[data-component=Component] {
+  .class[data-com=Component] {
     xxx: xxx;
   }
 }
@@ -265,7 +265,7 @@ div#id[data-component=Component] {
 				cha: 1,
 				nye: 2,
 				rootAttrs: {
-					"data-component": "XComponent"
+					"data-com": "XComponent"
 				}
 			};
 			expect(got).to.eql(expected);
@@ -278,7 +278,7 @@ div#id[data-component=Component] {
 				cha: 1,
 				rootAttrs: {
 					class: "aclass",
-					"data-component": "XComponent"
+					"data-com": "XComponent"
 				}
 			};
 			expect(got).to.eql(expected);
@@ -291,7 +291,7 @@ div#id[data-component=Component] {
 				cha: 1,
 				rootAttrs: {
 					id: "aId",
-					"data-component": "XComponent"
+					"data-com": "XComponent"
 				}
 			};
 			expect(got).to.eql(expected);
@@ -299,12 +299,12 @@ div#id[data-component=Component] {
 
 		it("attaches component name to root element attributes.", () => {
 			let got = component.getAttrs({attrs: {}});
-			expect(got.rootAttrs).to.eql({"data-component": "XComponent"});
+			expect(got.rootAttrs).to.eql({"data-com": "XComponent"});
 		});
 
-		it("does not override 'data-component' from parent component.", () => {
-			let got = component.getAttrs({attrs: {"data-component": "YComponent"}});
-			expect(got.rootAttrs).to.eql({"data-component": "YComponent"});
+		it("does not override 'data-com' from parent component.", () => {
+			let got = component.getAttrs({attrs: {"data-com": "YComponent"}});
+			expect(got.rootAttrs).to.eql({"data-com": "YComponent"});
 		});
 	});
 
@@ -394,7 +394,7 @@ div#id[data-component=Component] {
 				cha: 1,
 				nye: 2,
 				rootAttrs: {
-					"data-component": "XComponent"
+					"data-com": "XComponent"
 				}
 			};
 			expect(vnode.attrs).to.eql(expected);
@@ -467,7 +467,7 @@ div#id[data-component=Component] {
 				cha: 1,
 				nye: 2,
 				rootAttrs: {
-					"data-component": "XComponent"
+					"data-com": "XComponent"
 				}
 			};
 			expect(vnode.attrs).to.eql(expected);

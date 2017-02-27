@@ -105,8 +105,8 @@ export class Component {
         }
 
 		return key
-			.replace(/^([^@,%\s]*?)$/, `$1[data-component=${componentName}]`)
-			.replace(/^([^@]*?)\s+(.*?)$/, `$1[data-component=${componentName}] $2`)
+			.replace(/^([^@,%\s]*?)$/, `$1[data-com=${componentName}]`)
+			.replace(/^([^@]*?)\s+(.*?)$/, `$1[data-com=${componentName}] $2`)
 			// reverse for keyframe keys
 			.replace(/^(from\[.*?)$/, `from`)
 			.replace(/^(to\[.*?)$/, `to`);
@@ -179,7 +179,7 @@ export class Component {
 		newAttrs.rootAttrs = [
 			defaultAttrs.rootAttrs || {},
 			newAttrs.rootAttrs || {},
-			{"data-component": this.getComponentName()},
+			{"data-com": this.getComponentName()},
 			pickBy(newAttrs, this.isRootAttr)
 		].reduce(merge, {})
 
