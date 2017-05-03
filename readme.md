@@ -1,6 +1,6 @@
 # Introduction
 
-A component factory for [Mithril](https://github.com/lhorie/mithril.js).
+A component factory for [Mithril](https://github.com/MithrilJS/mithril.js).
 
 # Feature
 
