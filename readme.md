@@ -267,7 +267,6 @@ to head just before component is mounted to the DOM. The style is attached only 
 
 ```javascript
 class Dialog extends Component {
-	name: "dialog", // name is required for localizing style, else will throw error.
 	getStyle (vnode) {
 		// The JSON is one to one mapping of CSS as we will see later.
 		// If a property is in 'camelCase', it will be converted to 'snake-case'.
