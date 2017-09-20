@@ -43,7 +43,7 @@ export const merge = (destination, source) => {
 
 export class Component {
 	getComponentName() {
-		return this.constructor.displayName || this.constructor.name;
+		return this.name || this.constructor.name;
 	}
 
 	constructor() {

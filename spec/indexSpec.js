@@ -182,7 +182,7 @@ div#id[data-com=Component] {
 	describe("getComponentName", () => {
 		it("returns 'displayName' if present.", () => {
 			class Button extends Component {
-				static displayName = "Explicit Name"
+				name = "Explicit Name"
 			}
 
 			let b = new Button();
